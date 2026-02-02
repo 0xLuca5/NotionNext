@@ -1,6 +1,7 @@
 import NotionIcon from '@/components/NotionIcon'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { useRouter } from 'next/router'
 import CONFIG from '../config'
 
 /**
@@ -9,6 +10,13 @@ import CONFIG from '../config'
 export default function TitleBar(props) {
   const { post } = props
   const { fullWidth, siteInfo } = useGlobal()
+
+  const router = useRouter()
+  const isHome =
+    router?.pathname === '/' ||
+    router?.pathname === '/page/[page]' ||
+    router?.asPath === '/' ||
+    (router?.asPath && router.asPath.startsWith('/page/'))
 
   const title = post?.title || siteConfig('TITLE')
   const description = post?.description || siteConfig('AUTHOR')
@@ -21,8 +29,8 @@ export default function TitleBar(props) {
   return (
     <>
       {/* 标题栏 */}
-      {!fullWidth && (
-        <div className='relative overflow-hidden text-center px-6 py-12 mb-6 bg-gray-100 dark:bg-hexo-black-gray dark:border-hexo-black-gray border-b'>
+      {!fullWidth && (!isHome || post) && (
+        <div className='relative overflow-hidden text-center px-6 py-12 mb-6 mt-14 bg-gray-100 dark:bg-hexo-black-gray dark:border-hexo-black-gray border-b'>
           <h1 className='title-1 relative text-xl md:text-4xl pb-4 z-10'>
             {siteConfig('POST_TITLE_ICON') && (
               <NotionIcon icon={post?.pageIcon} />

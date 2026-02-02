@@ -31,8 +31,8 @@ export const BlogListPage = props => {
   return (
     <div className={`w-full ${showPageCover ? 'md:pr-2' : 'md:pr-12'} mb-12`}>
       <div id='posts-wrapper'>
-        {posts?.map(post => (
-          <BlogItem key={post.id} post={post} />
+        {posts?.map((post, index) => (
+          <BlogItem key={post.id} post={post} index={index} />
         ))}
       </div>
 

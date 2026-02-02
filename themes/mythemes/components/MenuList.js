@@ -9,7 +9,7 @@ import { MenuItemDrop } from './MenuItemDrop'
  * @returns
  */
 export const MenuList = props => {
-  const { customNav, customMenu } = props
+  const { customNav, customMenu, isHome } = props
   const { locale } = useGlobal()
 
   let links = [
@@ -56,18 +56,16 @@ export const MenuList = props => {
     return null
   }
 
+  // koharu 风格：搜索按钮在 Header 右侧，不在主菜单里
+  links = links.filter(l => l?.href !== '/search')
+
   return (
-    <nav className='w-full bg-white md:pt-0 px-6 relative z-20 border-t border-b border-gray-light dark:border-hexo-black-gray dark:bg-black'>
-      <div className='mx-auto max-w-4xl md:flex justify-between items-center text-sm md:text-md md:justify-start'>
-        <ul className='w-full text-center md:text-left flex flex-wrap justify-center items-stretch md:justify-start md:items-start'>
-          {links.map((link, index) => (
-            <MenuItemDrop key={index} link={link} />
-          ))}
-        </ul>
-        {/* <div className="w-full md:w-1/3 text-center md:text-right"> */}
-        {/* <!-- extra links --> */}
-        {/* </div> */}
-      </div>
+    <nav className='flex items-center'>
+      <ul className='flex items-center gap-1.5'>
+        {links.map((link, index) => (
+          <MenuItemDrop key={index} link={link} isHome={isHome} />
+        ))}
+      </ul>
     </nav>
   )
 }

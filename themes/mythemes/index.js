@@ -9,6 +9,7 @@ import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
 import SmartLink from '@/components/SmartLink'
+import LazyImage from '@/components/LazyImage'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import BlogListArchive from './components/BlogListArchive'
@@ -24,6 +25,60 @@ import TitleBar from './components/TitleBar'
 import CONFIG from './config'
 import { Style } from './style'
 
+const WaveSvg = () => {
+  return (
+    <div className='wave-wrap'>
+      <svg
+        className='wave'
+        xmlns='http://www.w3.org/2000/svg'
+        viewBox='0 24 150 28'
+        preserveAspectRatio='none'
+        aria-hidden='true'>
+        <defs>
+          <path
+            id='gentle-wave'
+            d='m -160,44.4 c 30,0 58,-18 87.7,-18 30.3,0 58.3,18 87.3,18 30,0 58,-18 88,-18 30,0 58,18 88,18 l 0,34.5 -351,0 z'
+          />
+        </defs>
+        <g className='parallax'>
+          <use xlinkHref='#gentle-wave' x='50' y='0' />
+          <use xlinkHref='#gentle-wave' x='50' y='3' />
+          <use xlinkHref='#gentle-wave' x='50' y='6' />
+        </g>
+      </svg>
+    </div>
+  )
+}
+
+const HomeCover = props => {
+  const title = props?.siteInfo?.title || siteConfig('TITLE')
+  const description = props?.siteInfo?.description || siteConfig('DESCRIPTION')
+  const bannerImage = props?.siteInfo?.pageCover || siteConfig('HOME_BANNER_IMAGE')
+
+  console.log(props.siteInfo)
+
+  return (
+    <div className='relative flex h-[60dvh] max-h-[800px] overflow-hidden'>
+      <div className='absolute inset-0 h-full bg-black/40' />
+      <div className='absolute inset-0 bottom-[8vh] flex flex-col items-center justify-center px-5 text-white'>
+        <h1 className='shadow-text text-center text-5xl/[1.2] font-bold tracking-widest max-w-7xl'>
+          {title}
+        </h1>
+        {description && <p className='shadow-text mt-5 text-sm'>= {description} =</p>}
+      </div>
+      <div className='hero-bottom-fade absolute inset-x-0 bottom-0 h-28' />
+      <div className='relative -z-10 h-full min-h-60 w-full'>
+        <LazyImage
+          src={bannerImage}
+          className='h-full w-full object-cover'
+          alt='cover'
+        />
+      </div>
+      <WaveSvg />
+    </div>
+  )
+}
+
 /**
  * 基础布局框架
  * 1.其它页面都嵌入在LayoutBase中
@@ -35,6 +90,19 @@ const LayoutBase = props => {
   const { children, post } = props
   const { onLoading, fullWidth, locale } = useGlobal()
 
+  const router = useRouter()
+  const isHome =
+    router?.pathname === '/' ||
+    router?.pathname === '/page/[page]' ||
+    router?.asPath === '/' ||
+    (router?.asPath && router.asPath.startsWith('/page/'))
+
+  const slotCover =
+    props.slotCover || (isHome ? <HomeCover siteInfo={props?.siteInfo} /> : null)
+  const slotSider = props.slotSider || (isHome ? <SideBar {...props} /> : null)
+
+  const hasSider = Boolean(slotSider)
+
   // 文章详情页左右布局改为上下布局
   const LAYOUT_VERTICAL =
     post && siteConfig('EXAMPLE_ARTICLE_LAYOUT_VERTICAL', false, CONFIG)
@@ -45,7 +113,7 @@ const LayoutBase = props => {
   return (
     <div
       id='theme-example'
-      className={`${siteConfig('FONT_STYLE')} dark:text-gray-300  bg-white dark:bg-black scroll-smooth`}>
+      className={`${siteConfig('FONT_STYLE')} dark:text-gray-300 scroll-smooth`}>
       <Style />
 
       {/* 页头 */}
@@ -53,17 +121,24 @@ const LayoutBase = props => {
       {/* 标题栏 */}
       <TitleBar {...props} />
 
+      {slotCover}
+
       {/* 主体 */}
       <div id='container-inner' className='w-full relative z-10'>
         <div
           id='container-wrapper'
-          className={`relative mx-auto justify-center md:flex py-8 px-2
+          className={`relative mx-auto justify-center md:flex py-8 px-2 ${hasSider ? 'max-w-7xl' : ''}
           ${LAYOUT_SIDEBAR_REVERSE ? 'flex-row-reverse' : ''} 
           ${LAYOUT_VERTICAL ? 'items-center flex-col' : 'items-start'} 
           `}>
+          {hasSider && (
+            <aside className='hidden md:block w-64 min-w-64 max-w-64 px-2 sticky top-0 self-start h-screen overflow-auto scroll-gutter-stable shadow-home-sider'>
+              {slotSider}
+            </aside>
+          )}
           {/* 内容 */}
           <div
-            className={`${fullWidth ? '' : LAYOUT_VERTICAL ? 'max-w-5xl' : 'max-w-3xl'} w-full xl:px-14 lg:px-4`}>
+            className={`${hasSider ? 'min-w-0 grow' : ''} ${fullWidth ? '' : LAYOUT_VERTICAL ? 'max-w-5xl' : 'max-w-3xl'} w-full xl:px-14 lg:px-4`}>
             <Transition
               show={!onLoading}
               appear={true}
@@ -80,17 +155,6 @@ const LayoutBase = props => {
             </Transition>
           </div>
 
-          {/* 侧边栏 */}
-          {!fullWidth && (
-            <div
-              className={`${
-                LAYOUT_VERTICAL
-                  ? 'flex space-x-0 md:space-x-2 md:flex-row flex-col w-full max-w-5xl justify-center xl:px-14 lg:px-4'
-                  : 'md:w-64 sticky top-8'
-              }`}>
-              <SideBar {...props} />
-            </div>
-          )}
         </div>
       </div>
 
@@ -116,7 +180,12 @@ const LayoutBase = props => {
  * @returns 此主题首页就是列表
  */
 const LayoutIndex = props => {
-  return <LayoutPostList {...props} />
+  return (
+    <div className='bg-gradient-start shadow-box flex flex-col gap-4 overflow-hidden rounded-xl px-10 py-8 md:px-6 md:pt-6 md:pb-2'>
+      <div className='text-sm font-semibold opacity-80'>文章列表</div>
+      <LayoutPostList {...props} />
+    </div>
+  )
 }
 
 /**

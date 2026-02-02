@@ -58,10 +58,10 @@ export const BlogListScroll = props => {
   return (
     <div
       id='posts-wrapper'
-      className={`w-full ${showPageCover ? 'md:pr-2' : 'md:pr-12'}} mb-12`}
+      className={`w-full ${showPageCover ? 'md:pr-2' : 'md:pr-12'} mb-12`}
       ref={targetRef}>
-      {postsToShow?.map(post => (
-        <BlogItem key={post.id} post={post} />
+      {postsToShow?.map((post, index) => (
+        <BlogItem key={post.id} post={post} index={index} />
       ))}
 
       <div

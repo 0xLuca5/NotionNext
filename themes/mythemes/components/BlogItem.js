@@ -10,72 +10,73 @@ import CONFIG from '../config'
  * @param {*} param0
  * @returns
  */
-const BlogItem = ({ post }) => {
+const BlogItem = ({ post, index = 0 }) => {
   const showPageCover =
     siteConfig('EXAMPLE_POST_LIST_COVER', null, CONFIG) &&
     post?.pageCoverThumbnail
 
-  return (
-    <article
-      className={`${showPageCover ? 'flex md:flex-row flex-col-reverse' : ''} replace mb-12 `}>
-      <div className={`${showPageCover ? 'md:w-7/12' : ''}`}>
-        <h2 className='mb-4'>
-          <SmartLink
-            href={post?.href}
-            className='text-black dark:text-gray-100 text-xl md:text-2xl no-underline hover:underline'>
-            {siteConfig('POST_TITLE_ICON') && (
-              <NotionIcon icon={post.pageIcon} />
-            )}
-            {post?.title}
-          </SmartLink>
-        </h2>
+  const coverOnLeft = index % 2 === 0
 
-        <div className='mb-4 text-sm text-gray-700 dark:text-gray-300'>
-          by{' '}
-          <a href='#' className='text-gray-700 dark:text-gray-300'>
-            {siteConfig('AUTHOR')}
-          </a>{' '}
-          on {post.date?.start_date || post.createdTime}
-          <TwikooCommentCount post={post} className='pl-1' />
-          {post.category && (
-            <>
-              <span className='font-bold mx-1'> | </span>
+  return (
+    <article className='group post-item-card shadow-card hover:shadow-card-darker transition-shadow duration-300 rounded-lg overflow-hidden bg-white/80 dark:bg-black/20 backdrop-blur replace mb-6'>
+      <div
+        className={`${showPageCover ? 'flex flex-col md:flex-row' : ''} ${showPageCover && !coverOnLeft ? 'md:flex-row-reverse' : ''}`}>
+        <div className={`${showPageCover ? 'md:w-7/12 p-5' : 'p-5'}`}>
+          <h2 className='mb-3'>
+            <SmartLink
+              href={post?.href}
+              className='text-black dark:text-gray-100 text-xl md:text-2xl no-underline hover:underline'>
+              {siteConfig('POST_TITLE_ICON') && <NotionIcon icon={post.pageIcon} />}
+              {post?.title}
+            </SmartLink>
+          </h2>
+
+          <div className='mb-3 text-xs text-gray-600 dark:text-gray-300 flex flex-wrap gap-x-2 gap-y-1 items-center'>
+            <span>
+              by{' '}
+              <a href='#' className='text-gray-600 dark:text-gray-300'>
+                {siteConfig('AUTHOR')}
+              </a>
+            </span>
+            <span>on {post.date?.start_date || post.createdTime}</span>
+            <TwikooCommentCount post={post} className='pl-1' />
+            {post.category && (
               <SmartLink
                 href={`/category/${post.category}`}
-                className='text-gray-700 dark:text-gray-300 hover:underline'>
+                className='text-gray-600 dark:text-gray-300 hover:underline'>
                 {post.category}
               </SmartLink>
-            </>
+            )}
+          </div>
+
+          {!post.results && (
+            <p className='line-clamp-3 text-gray-700 dark:text-gray-200/80 leading-relaxed'>
+              {post.summary}
+            </p>
           )}
-          {/* <span className="font-bold mx-1"> | </span> */}
-          {/* <a href="#" className="text-gray-700">2 Comments</a> */}
+          {post.results && (
+            <p className='line-clamp-3 mt-3 text-gray-700 dark:text-gray-200/80 text-sm font-light leading-7'>
+              {post.results.map((r, idx) => (
+                <span key={idx}>{r}</span>
+              ))}
+            </p>
+          )}
         </div>
 
-        {!post.results && (
-          <p className='line-clamp-3 text-gray-700 dark:text-gray-400 leading-normal'>
-            {post.summary}
-          </p>
-        )}
-        {/* 搜索结果 */}
-        {post.results && (
-          <p className='line-clamp-3 mt-4 text-gray-700 dark:text-gray-300 text-sm font-light leading-7'>
-            {post.results.map((r, index) => (
-              <span key={index}>{r}</span>
-            ))}
-          </p>
+        {showPageCover && (
+          <div className='md:w-5/12 w-full h-56 md:h-auto overflow-hidden'>
+            <SmartLink href={post?.href} passHref legacyBehavior>
+              <a href={post?.href}>
+                <LazyImage
+                  src={post?.pageCoverThumbnail}
+                  className='h-full w-full object-cover transition duration-500 group-hover:scale-110 group-hover:rotate-2'
+                  alt={post?.title}
+                />
+              </a>
+            </SmartLink>
+          </div>
         )}
       </div>
-      {/* 图片封面 */}
-      {showPageCover && (
-        <div className='md:w-5/12 w-full h-44 overflow-hidden p-1'>
-          <SmartLink href={post?.href} passHref legacyBehavior>
-            <LazyImage
-              src={post?.pageCoverThumbnail}
-              className='w-full bg-cover hover:scale-110 duration-200'
-            />
-          </SmartLink>
-        </div>
-      )}
     </article>
   )
 }
