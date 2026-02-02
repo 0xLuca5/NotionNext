@@ -2,6 +2,12 @@
  * 主题配置文件
  */
 const CONFIG = {
+    // 3.14.1以后的版本中，欢迎语在blog.config.js中配置，用英文逗号','隔开多个。
+  GREETING_WORDS: [
+    '念念不忘',
+    '必有回响',
+    '欢迎来到我的博客🎉'
+  ], // 首页大图标语文字
   // 菜单配置
   EXAMPLE_MENU_CATEGORY: true, // 显示分类
   EXAMPLE_MENU_TAG: true, // 显示标签

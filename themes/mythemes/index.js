@@ -6,12 +6,12 @@ import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
-import { isBrowser } from '@/lib/utils'
+import { isBrowser, loadExternalResource } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
 import SmartLink from '@/components/SmartLink'
 import LazyImage from '@/components/LazyImage'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
@@ -51,9 +51,45 @@ const WaveSvg = () => {
 }
 
 const HomeCover = props => {
+  const typedRef = useRef(null)
   const title = props?.siteInfo?.title || siteConfig('TITLE')
   const description = props?.siteInfo?.description || siteConfig('DESCRIPTION')
   const bannerImage = props?.siteInfo?.pageCover || siteConfig('HOME_BANNER_IMAGE')
+
+  useEffect(() => {
+    if (!isBrowser) return
+
+    const GREETING_WORDS = (siteConfig('GREETING_WORDS') || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+
+    let canceled = false
+
+    if (GREETING_WORDS.length > 0 && document.getElementById('typed-mythemes')) {
+      loadExternalResource('/js/typed.min.js', 'js').then(() => {
+        if (canceled) return
+        if (window.Typed && !typedRef.current) {
+          typedRef.current = new window.Typed('#typed-mythemes', {
+            strings: GREETING_WORDS,
+            typeSpeed: 200,
+            backSpeed: 100,
+            backDelay: 400,
+            showCursor: true,
+            smartBackspace: true
+          })
+        }
+      })
+    }
+
+    return () => {
+      canceled = true
+      if (typedRef.current?.destroy) {
+        typedRef.current.destroy()
+      }
+      typedRef.current = null
+    }
+  }, [])
 
   return (
     <div className='relative flex h-[60dvh] max-h-[800px] overflow-hidden'>
@@ -62,7 +98,10 @@ const HomeCover = props => {
         <h1 className='shadow-text text-center text-5xl/[1.2] font-bold tracking-widest max-w-7xl'>
           {title}
         </h1>
-        {description && <p className='shadow-text mt-5 text-sm'>= {description} =</p>}
+        {description && <p className='shadow-text mt-4 text-sm'>= {description} =</p>}
+        <div className='shadow-text mt-5 text-sm h-6 flex items-center justify-center'>
+          <span id='typed-mythemes' />
+        </div>
       </div>
       <div className='hero-bottom-fade absolute inset-x-0 bottom-0 h-28' />
       <div className='relative -z-10 h-full min-h-60 w-full'>
@@ -97,7 +136,7 @@ const LayoutBase = props => {
 
   const slotCover =
     props.slotCover || (isHome ? <HomeCover siteInfo={props?.siteInfo} /> : null)
-  const slotSider = props.slotSider || (isHome ? <SideBar {...props} /> : null)
+  const slotSider = props.slotSider || <SideBar {...props} />
 
   const hasSider = Boolean(slotSider)
 
@@ -136,7 +175,15 @@ const LayoutBase = props => {
           )}
           {/* 内容 */}
           <div
-            className={`${hasSider ? 'min-w-0 grow' : ''} ${fullWidth ? '' : LAYOUT_VERTICAL ? 'max-w-5xl' : 'max-w-3xl'} w-full xl:px-14 lg:px-4`}>
+            className={`${hasSider ? 'min-w-0 grow' : ''} ${
+              fullWidth
+                ? ''
+                : LAYOUT_VERTICAL
+                  ? 'max-w-5xl'
+                  : hasSider
+                    ? 'max-w-none'
+                    : 'max-w-3xl'
+            } w-full xl:px-14 lg:px-4`}>
             <Transition
               show={!onLoading}
               appear={true}

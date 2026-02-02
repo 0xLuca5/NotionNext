@@ -70,7 +70,7 @@ const KoharuSearchModal = ({ isOpen, onClose }) => {
         onClick={() => onClose?.()}
       />
       <div className='fixed inset-0 grid place-items-center px-4'>
-        <div className='w-full max-w-2xl overflow-hidden rounded-xl bg-gradient-start shadow-box'>
+        <div className='w-full max-w-2xl overflow-hidden rounded-xl  shadow-box'>
           <div className='p-6 md:p-4'>
             <div className='flex items-center justify-between'>
               <h2 className='flex items-center gap-2 font-semibold text-lg md:text-base text-gray-900 dark:text-gray-100'>
