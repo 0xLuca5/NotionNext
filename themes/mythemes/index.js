@@ -55,8 +55,6 @@ const HomeCover = props => {
   const description = props?.siteInfo?.description || siteConfig('DESCRIPTION')
   const bannerImage = props?.siteInfo?.pageCover || siteConfig('HOME_BANNER_IMAGE')
 
-  console.log(props.siteInfo)
-
   return (
     <div className='relative flex h-[60dvh] max-h-[800px] overflow-hidden'>
       <div className='absolute inset-0 h-full bg-black/40' />
