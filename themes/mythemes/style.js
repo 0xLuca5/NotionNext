@@ -28,6 +28,7 @@ const Style = () => {
       );
       --box-bg-shadow: rgba(0, 0, 0, 0.1);
       --grey-1-a5: rgba(253, 253, 253, 0.5);
+      --mythemes-header-offset: 0px;
     }
 
     .dark {

@@ -4,6 +4,7 @@ import Comment from '@/components/Comment'
 import replaceSearchResult from '@/components/Mark'
 import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
+import Live2D from '@/components/Live2D'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
@@ -169,7 +170,7 @@ const LayoutBase = props => {
           ${LAYOUT_VERTICAL ? 'items-center flex-col' : 'items-start'} 
           `}>
           {hasSider && (
-            <aside className='hidden md:block w-64 min-w-64 max-w-64 px-2 sticky top-0 self-start h-screen overflow-auto scroll-gutter-stable shadow-home-sider'>
+            <aside className='hidden md:block w-64 min-w-64 max-w-64 px-2 sticky top-[calc(var(--mythemes-header-offset)+2rem)] self-start shadow-home-sider'>
               {slotSider}
             </aside>
           )}
@@ -201,6 +202,11 @@ const LayoutBase = props => {
           </div>
 
         </div>
+      </div>
+
+      {/* Live2D */}
+      <div className='hidden md:block fixed left-4 bottom-4 z-20'>
+        <Live2D />
       </div>
 
       {/* 页脚 */}

@@ -240,20 +240,90 @@ export const Header = props => {
 
   const brandLogo = '/cosine-logo.svg'
 
+  const headerRef = useRef(null)
+  const lastScrollYRef = useRef(0)
+
   const [withBackground, setWithBackground] = useState(!isHome)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [isHidden, setIsHidden] = useState(false)
+  const [headerHeight, setHeaderHeight] = useState(0)
 
   useEffect(() => {
-    if (!isHome) {
-      setWithBackground(true)
+    if (typeof window === 'undefined') {
       return
     }
 
-    const onScroll = () => {
-      setWithBackground(window.scrollY > 20)
+    const el = headerRef.current
+    if (!el) {
+      return
     }
+
+    const update = () => {
+      setHeaderHeight(el?.offsetHeight || 0)
+    }
+
+    update()
+
+    let ro = null
+    if (typeof window.ResizeObserver !== 'undefined') {
+      ro = new window.ResizeObserver(update)
+      ro.observe(el)
+    }
+
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      ro?.disconnect?.()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return
+    }
+    const offset = isHidden ? 0 : headerHeight
+    document.documentElement.style.setProperty('--mythemes-header-offset', `${offset}px`)
+  }, [isHidden, headerHeight])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    let ticking = false
+
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY || 0
+
+        if (!isHome) {
+          setWithBackground(true)
+        } else {
+          setWithBackground(y > 20)
+        }
+
+        const lastY = lastScrollYRef.current
+        const delta = y - lastY
+
+        if (y < 10) {
+          setIsHidden(false)
+        } else if (delta > 8) {
+          setIsHidden(true)
+        } else if (delta < -8) {
+          setIsHidden(false)
+        }
+
+        lastScrollYRef.current = y
+        ticking = false
+      })
+    }
+
+    lastScrollYRef.current = window.scrollY || 0
     onScroll()
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [isHome])
 
@@ -279,7 +349,8 @@ export const Header = props => {
   return (
     <header
       id='site-header'
-      className={`shadow-text fixed inset-x-0 top-0 z-30 select-none transition-colors duration-300 overflow-visible ${withBackground ? 'with-background header-glass text-gray-900 dark:text-gray-100' : 'text-white'}`}>
+      ref={headerRef}
+      className={`shadow-text fixed inset-x-0 top-0 z-30 select-none transition-[transform,colors] duration-300 overflow-visible transform-gpu ${isHidden ? 'md:-translate-y-full' : ''} ${withBackground ? 'with-background header-glass text-gray-900 dark:text-gray-100' : 'text-white'}`}>
       <div className='mx-auto max-w-7xl flex items-center justify-between gap-4 px-6 py-2.5'>
         <div className='flex items-center gap-2'>
           <SmartLink href='/' passHref legacyBehavior>

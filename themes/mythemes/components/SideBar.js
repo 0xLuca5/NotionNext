@@ -494,7 +494,7 @@ export const SideBar = props => {
               标签
             </SmartLink>
           </div>
-          <NavButtons />
+          {/* <NavButtons /> */}
         </div>
       </aside>
 
@@ -524,12 +524,6 @@ export const SideBar = props => {
           </div>
         </aside>
       )}
-
-      {/* 宠物挂件 */}
-      <aside
-        className={`rounded overflow-hidden mb-6 ${LAYOUT_VERTICAL ? 'hidden md:fixed right-4 bottom-20' : ''}`}>
-        <Live2D />
-      </aside>
     </>
   )
 }
