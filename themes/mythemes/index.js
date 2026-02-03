@@ -170,7 +170,7 @@ const LayoutBase = props => {
           ${LAYOUT_VERTICAL ? 'items-center flex-col' : 'items-start'} 
           `}>
           {hasSider && (
-            <aside className='hidden md:block w-64 min-w-64 max-w-64 px-2 sticky top-[calc(var(--mythemes-header-offset)+2rem)] self-start shadow-home-sider'>
+            <aside className='hidden md:block w-64 min-w-64 max-w-64 px-2 sticky top-[calc(var(--mythemes-header-offset)+2rem)] self-start '>
               {slotSider}
             </aside>
           )}

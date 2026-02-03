@@ -494,7 +494,7 @@ export const SideBar = props => {
               标签
             </SmartLink>
           </div>
-          {/* <NavButtons /> */}
+          <NavButtons />
         </div>
       </aside>
 
@@ -507,10 +507,6 @@ export const SideBar = props => {
           <Catalog toc={post?.toc} />
         </aside>
       )}
-
-      {/* 公告 */}
-      {/* 公告栏 */}
-      {!HIDDEN_NOTIFICATION && <Announcement post={notice} />}
 
       {/* 最近评论 */}
       {COMMENT_WALINE_SERVER_URL && COMMENT_WALINE_RECENT && (
