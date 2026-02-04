@@ -4,6 +4,7 @@ import throttle from 'lodash.throttle'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import CONFIG from '../config'
 import BlogItem from './BlogItem'
+import Divider from './Divider'
 /**
  * 使用滚动无限加载的博客列表
  * @param {*} props
@@ -56,20 +57,23 @@ export const BlogListScroll = props => {
   })
 
   return (
-    <div
-      id='posts-wrapper'
-      className={`w-full ${showPageCover ? 'md:pr-2' : 'md:pr-12'} mb-12`}
-      ref={targetRef}>
-      {postsToShow?.map((post, index) => (
-        <BlogItem key={post.id} post={post} index={index} />
-      ))}
-
+    <>
+      <Divider>文章列表</Divider>
       <div
-        onClick={handleGetMore}
-        className='w-full my-4 py-4 text-center cursor-pointer '>
-        {' '}
-        {hasMore ? locale.COMMON.MORE : `${locale.COMMON.NO_MORE} 😰`}{' '}
+        id='posts-wrapper'
+        className='w-full mb-12'
+        ref={targetRef}>
+        {postsToShow?.map((post, index) => (
+          <BlogItem key={post.id} post={post} index={index} />
+        ))}
+
+        <div
+          onClick={handleGetMore}
+          className='w-full my-4 py-4 text-center cursor-pointer '>
+          {' '}
+          {hasMore ? locale.COMMON.MORE : `${locale.COMMON.NO_MORE} 😰`}{' '}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

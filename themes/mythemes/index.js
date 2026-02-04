@@ -13,6 +13,7 @@ import SmartLink from '@/components/SmartLink'
 import LazyImage from '@/components/LazyImage'
 import { useRouter } from 'next/router'
 import { useEffect, useRef } from 'react'
+import { countWords } from '@/lib/plugins/wordCount'
 import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
@@ -150,7 +151,7 @@ const LayoutBase = props => {
 
   return (
     <div
-      id='theme-example'
+      id='theme-mythemes'
       className={`${siteConfig('FONT_STYLE')} dark:text-gray-300 scroll-smooth`}>
       <Style />
 
@@ -165,7 +166,7 @@ const LayoutBase = props => {
       <div id='container-inner' className='w-full relative z-10'>
         <div
           id='container-wrapper'
-          className={`relative mx-auto justify-center md:flex py-8 px-2 ${hasSider ? 'max-w-7xl' : ''}
+          className={`relative mx-auto justify-center md:flex py-8 ${hasSider ? 'max-w-7xl' : ''}
           ${LAYOUT_SIDEBAR_REVERSE ? 'flex-row-reverse' : ''} 
           ${LAYOUT_VERTICAL ? 'items-center flex-col' : 'items-start'} 
           `}>
@@ -176,15 +177,9 @@ const LayoutBase = props => {
           )}
           {/* 内容 */}
           <div
-            className={`${hasSider ? 'min-w-0 grow' : ''} ${
-              fullWidth
-                ? ''
-                : LAYOUT_VERTICAL
-                  ? 'max-w-5xl'
-                  : hasSider
-                    ? 'max-w-none'
-                    : 'max-w-3xl'
-            } w-full xl:px-14 lg:px-4`}>
+            className={`${hasSider ? 'min-w-0 grow' : 'max-w-7xl'} ${
+              fullWidth ? '' : LAYOUT_VERTICAL ? 'max-w-5xl' : ''
+            } w-full px-4 tablet:px-6`}>
             <Transition
               show={!onLoading}
               appear={true}
@@ -231,9 +226,62 @@ const LayoutBase = props => {
  * @returns 此主题首页就是列表
  */
 const LayoutIndex = props => {
+  const noticePost = props?.notice
+  const noticeHref = noticePost?.href || (noticePost?.slug ? `/post/${noticePost.slug}` : null)
+  const noticeCover =
+    noticePost?.pageCoverThumbnail || noticePost?.pageCover || noticePost?.pageCoverUrl
+  const noticeDate = noticePost?.date?.start_date || noticePost?.publishDay || noticePost?.createdTime
+  
+  // 计算字数和阅读时间（如果没有的话）
+  const postDescription = noticePost?.summary || noticePost?.description || ''
+  const metaText = `${noticePost?.title || ''} ${postDescription}`.trim()
+  const estimated = metaText ? countWords(metaText) : { wordCount: 0, readTime: 0 }
+  const noticeWordCount = Number.isFinite(noticePost?.wordCount) && noticePost.wordCount > 0
+    ? noticePost.wordCount
+    : estimated.wordCount
+  const noticeReadTime = Number.isFinite(noticePost?.readTime) && noticePost.readTime > 0
+    ? noticePost.readTime
+    : estimated.readTime
+
   return (
-    <div className='bg-gradient-start shadow-box flex flex-col gap-4 overflow-hidden rounded-xl px-10 py-8 md:px-6 md:pt-6 md:pb-2'>
-      <div className='text-sm font-semibold opacity-80'>文章列表</div>
+    <div className='shadow-box flex flex-col gap-4 overflow-hidden rounded-xl px-10 py-8 md:px-6 md:pt-6 md:pb-2'>
+      {noticePost && noticeHref && (
+        <div className='kira-post'>
+          <SmartLink href={noticeHref} className='block no-underline'>
+            <div className='kira-post-cover'>
+              {noticeCover && (
+                <LazyImage
+                  src={noticeCover}
+                  alt={noticePost?.title}
+                  className='kira-post-cover-image'
+                />
+              )}
+              <h1>{noticePost?.title}</h1>
+              {/* 元数据显示在封面右上角 */}
+              <div className='absolute top-4 right-4 flex flex-col gap-2 text-white text-xs z-10'>
+                {noticeDate && (
+                  <span className='flex items-center gap-1 bg-foreground/50 backdrop-blur-sm px-2 py-1 rounded'>
+                    <i className='fas fa-calendar-alt' />
+                    {noticeDate}
+                  </span>
+                )}
+                {noticeWordCount > 0 && (
+                  <span className='flex items-center gap-1 bg-foreground/50 backdrop-blur-sm px-2 py-1 rounded'>
+                    <i className='fas fa-file-word' />
+                    {noticeWordCount} 字
+                  </span>
+                )}
+                {noticeReadTime > 0 && (
+                  <span className='flex items-center gap-1 bg-foreground/50 backdrop-blur-sm px-2 py-1 rounded'>
+                    <i className='fas fa-clock' />
+                    大概 {noticeReadTime} 分钟
+                  </span>
+                )}
+              </div>
+            </div>
+          </SmartLink>
+        </div>
+      )}
       <LayoutPostList {...props} />
     </div>
   )
