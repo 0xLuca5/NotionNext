@@ -38,7 +38,7 @@ const BlogItem = ({ post, index = 0 }) => {
       {showPageCover && (
         <SmartLink
           href={post?.href}
-          className={`post-cover block shrink-0 relative h-46.5 max-h-46.5 w-[calc(50%-2rem)] overflow-hidden rounded-lg ${
+          className={`post-cover block shrink-0 relative h-46.5 max-h-46.5 md:h-56 md:max-h-56 w-[calc(50%-2rem)] overflow-hidden rounded-lg ${
             coverOnLeft ? 'clip-path-post-img-left order-1' : 'clip-path-post-img-right order-2'
           }`}>
           <LazyImage
@@ -50,22 +50,22 @@ const BlogItem = ({ post, index = 0 }) => {
       )}
 
       <div
-        className={`post-content flex flex-col gap-2 pt-4 pb-2 md:pb-4 md:pt-1 px-4 md:px-4 ${
+        className={`post-content flex flex-col gap-2 pt-3 pb-1 md:pb-4 md:pt-1 px-4 md:px-4 ${
           hasCover ? 'w-[calc(50%+2rem)]' : 'w-full'
         } ${hasCover ? (coverOnLeft ? 'order-2' : 'order-1') : ''}`}>
         
         {/* Category 和元数据在同一行 */}
-        <div className='flex w-full justify-between items-center py-2'>
+        <div className='post-meta-row flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1 md:py-2'>
           {post.category && (
             <SmartLink
               href={`/category/${post.category}`}
-              className='flex items-center gap-1 text-xs text-muted-foreground hover:text-blue-500 transition-colors duration-300'>
+              className='flex min-w-0 max-w-[52%] items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors duration-300'>
               <i className='fas fa-flag' />
-              {post.category}
+              <span className='min-w-0 truncate'>{post.category}</span>
             </SmartLink>
           )}
 
-          <div className='text-muted-foreground flex items-center gap-4 text-xs ml-auto'>
+          <div className='post-meta flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs ml-auto text-gray-500 dark:text-gray-400'>
             {dateText && (
               <span className='flex items-center gap-1'>
                 <i className='fas fa-calendar-alt' />
@@ -79,7 +79,7 @@ const BlogItem = ({ post, index = 0 }) => {
               </span>
             )}
             {readTime > 0 && (
-              <span className='flex items-center gap-1 md:hidden'>
+              <span className='post-meta-readtime hidden md:flex items-center gap-1'>
                 <i className='fas fa-clock' />
                 {readTime} 分钟
               </span>
@@ -101,9 +101,9 @@ const BlogItem = ({ post, index = 0 }) => {
         </div>
 
         {/* 摘要 */}
-        {!post.results && post.summary && (
+        {!post.results && postDescription && (
           <p className='text-muted-foreground line-clamp-3 h-15 text-sm md:h-auto md:max-h-15'>
-            {post.summary}
+            {postDescription}
           </p>
         )}
         {post.results && (
@@ -117,18 +117,16 @@ const BlogItem = ({ post, index = 0 }) => {
         {/* Tag 在底部，为 more 按钮留出空间 */}
         {tags.length > 0 && (
           <div
-            style={{
-              display: 'flex',
-              gap: '0.5rem',
-              paddingTop: '0.25rem',
-              paddingBottom: '0.25rem',
-              overflowX: 'auto',
-              marginTop: 'auto',
-              justifyContent: hasCover && !coverOnLeft ? 'flex-end' : 'flex-start',
-              marginRight: hasCover && coverOnLeft ? '4.5rem' : '0',
-              marginLeft: hasCover && !coverOnLeft ? '4.5rem' : '0'
-            }}
-            className='horizontal-scrollbar [--scrollbar-width:0.25rem]'>
+            className={`post-tags horizontal-scrollbar [--scrollbar-width:0.25rem] flex gap-2 pt-1 pb-1 overflow-auto mt-auto ${
+              // mobile: left align and reserve space for the bottom-right more button
+              'justify-start pr-16 md:pr-0'
+            }${
+              hasCover
+                ? coverOnLeft
+                  ? ' md:justify-start md:mr-16'
+                  : ' md:justify-end md:ml-16'
+                : ''
+            }`}>
             {tags.map(t => (
               <SmartLink
                 key={t}
@@ -143,15 +141,13 @@ const BlogItem = ({ post, index = 0 }) => {
         {/* More 按钮 - 绝对定位在角落 */}
         <SmartLink
           href={post?.href}
-          style={{
-            position: 'absolute',
-            bottom: '-0.25rem',
-            ...(hasCover 
-              ? (coverOnLeft ? { right: '-0.25rem', left: 'auto' } : { left: '-0.25rem', right: 'auto' })
-              : { right: '-0.25rem', left: 'auto' }
-            )
-          }}
-          className='post-more'>
+          className={`post-more absolute -bottom-1 ${
+            hasCover
+              ? coverOnLeft
+                ? '-right-1'
+                : '-left-1'
+              : '-right-1'
+          }`}>
           <div
             className={`bg-gradient-shoka-button rounded-2xl transition-all hover:translate-y-1 hover:scale-105 px-4 py-2 text-sm text-white font-medium ${
               hasCover

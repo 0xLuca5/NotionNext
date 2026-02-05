@@ -490,13 +490,6 @@ const Style = () => {
       }
     }
 
-    @media (max-width: 767px) {
-      .clip-path-post-img-left,
-      .clip-path-post-img-right {
-        clip-path: none;
-      }
-    }
-
     .horizontal-scrollbar {
       scrollbar-width: thin;
       scrollbar-color: rgba(0, 0, 0, 0.25) transparent;

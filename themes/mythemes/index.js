@@ -179,7 +179,7 @@ const LayoutBase = props => {
           <div
             className={`${hasSider ? 'min-w-0 grow' : 'max-w-7xl'} ${
               fullWidth ? '' : LAYOUT_VERTICAL ? 'max-w-5xl' : ''
-            } w-full px-4 tablet:px-6`}>
+            } w-full px-4 md:px-6`}>
             <Transition
               show={!onLoading}
               appear={true}
@@ -244,7 +244,7 @@ const LayoutIndex = props => {
     : estimated.readTime
 
   return (
-    <div className='shadow-box flex flex-col gap-4 overflow-hidden rounded-xl px-10 py-8 md:px-6 md:pt-6 md:pb-2'>
+    <div className='shadow-box flex flex-col gap-4 overflow-hidden rounded-xl px-2 py-8 md:px-6 md:pt-6 md:pb-2'>
       {noticePost && noticeHref && (
         <div className='kira-post'>
           <SmartLink href={noticeHref} className='block no-underline'>
