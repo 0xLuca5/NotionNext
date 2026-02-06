@@ -17,7 +17,9 @@ const BlogItem = ({ post, index = 0 }) => {
     post?.pageCoverThumbnail
 
   const coverOnLeft = index % 2 === 0
-  const tags = Array.isArray(post?.tags) ? post.tags : []
+  const tags = Array.isArray(post?.tags)
+    ? post.tags.filter(t => t !== '推荐')
+    : []
 
   const postDescription = post?.summary || post?.description || ''
   const metaText = `${post?.title || ''} ${postDescription}`.trim()

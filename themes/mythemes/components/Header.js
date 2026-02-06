@@ -240,7 +240,7 @@ export const Header = props => {
     router?.asPath === '/' ||
     (router?.asPath && router.asPath.startsWith('/page/'))
 
-  const brandLogo = '/cosine-logo.svg'
+  const brandLogo = '/luca5_logo.svg'
 
   const headerRef = useRef(null)
   const lastScrollYRef = useRef(0)
@@ -592,7 +592,7 @@ export const Header = props => {
               <LazyImage
                 src={brandLogo}
                 alt='COSINE'
-                className='h-7 md:h-8 w-auto object-contain'
+                className='h-7 md:h-12 w-auto object-contain'
               />
             </a>
           </SmartLink>

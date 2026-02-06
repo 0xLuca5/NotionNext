@@ -411,6 +411,18 @@ const Style = () => {
       color: hsl(var(--foreground));
     }
 
+    .text-foreground\/80 {
+      color: hsl(var(--foreground) / 0.8);
+    }
+
+    .text-foreground\/50 {
+      color: hsl(var(--foreground) / 0.5);
+    }
+
+    .text-foreground\/30 {
+      color: hsl(var(--foreground) / 0.3);
+    }
+
     .bg-foreground\/40 {
       background-color: hsl(var(--foreground) / 0.4);
     }
@@ -472,6 +484,12 @@ const Style = () => {
     @media (max-width: 767px) {
       .post-item-card {
         flex-direction: column !important;
+      }
+
+      .clip-path-post-img-left,
+      .clip-path-post-img-right {
+        -webkit-clip-path: none !important;
+        clip-path: none !important;
       }
 
       .post-item-card .post-cover {
@@ -566,6 +584,36 @@ const Style = () => {
 
     .paginator-button i {
       font-size: 0.875rem;
+    }
+
+    .random-posts {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-synthesis: none;
+    }
+
+    .footer-link {
+      opacity: 0.75;
+      position: relative;
+    }
+
+    .footer-link:hover {
+      opacity: 1;
+    }
+
+    .footer-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: currentColor;
+      transition: width 0.3s ease;
+    }
+
+    .footer-link:hover::after {
+      width: 100%;
     }
 
   `}</style>
