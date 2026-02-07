@@ -8,6 +8,7 @@ const CONFIG = {
     '必有回响',
     '欢迎来到我的博客🎉'
   ], // 首页大图标语文字
+  THEME_PRIMARY_COLOR: 'rgba(64, 135, 242)',
   // 菜单配置
   EXAMPLE_MENU_CATEGORY: true, // 显示分类
   EXAMPLE_MENU_TAG: true, // 显示标签

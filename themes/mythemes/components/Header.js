@@ -12,13 +12,88 @@ const SearchIcon = ({ className }) => {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
+      className={className || 'h-5 w-5'}
       viewBox='0 0 24 24'
-      fill='currentColor'
-      className={className}>
-      <title>Search</title>
-      <path d='M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z' />
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'>
+      <circle cx='11' cy='11' r='8' />
+      <line x1='21' y1='21' x2='16.65' y2='16.65' />
     </svg>
   )
+}
+
+const PaletteIcon = ({ className }) => {
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      className={className || 'h-5 w-5'}>
+      <path d='M12 22a10 10 0 1 1 10-10c0 2.2-1.8 4-4 4h-1a2 2 0 0 0-2 2c0 2.2-1.8 4-4 4Z' />
+      <circle cx='7.5' cy='10.5' r='1' />
+      <circle cx='12' cy='7.5' r='1' />
+      <circle cx='16.5' cy='10.5' r='1' />
+      <circle cx='9.5' cy='15.5' r='1' />
+    </svg>
+  )
+}
+
+const clamp01 = n => Math.max(0, Math.min(1, n))
+
+const hexToRgb = hex => {
+  const value = (hex || '').trim().replace('#', '')
+  if (value.length !== 6) return null
+  const r = parseInt(value.slice(0, 2), 16)
+  const g = parseInt(value.slice(2, 4), 16)
+  const b = parseInt(value.slice(4, 6), 16)
+  if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b)) return null
+  return { r, g, b }
+}
+
+const rgbToHsl = (r, g, b) => {
+  const rn = clamp01(r / 255)
+  const gn = clamp01(g / 255)
+  const bn = clamp01(b / 255)
+  const max = Math.max(rn, gn, bn)
+  const min = Math.min(rn, gn, bn)
+  const delta = max - min
+  let h = 0
+  let s = 0
+  const l = (max + min) / 2
+  if (delta !== 0) {
+    s = delta / (1 - Math.abs(2 * l - 1))
+    switch (max) {
+      case rn:
+        h = ((gn - bn) / delta) % 6
+        break
+      case gn:
+        h = (bn - rn) / delta + 2
+        break
+      default:
+        h = (rn - gn) / delta + 4
+        break
+    }
+    h = Math.round(h * 60)
+    if (h < 0) h += 360
+  }
+  return { h, s: Math.round(s * 100), l: Math.round(l * 100) }
+}
+
+const applyThemeColor = hex => {
+  if (typeof document === 'undefined') return
+  const rgb = hexToRgb(hex)
+  if (!rgb) return
+  const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b)
+  document.documentElement.style.setProperty('--primary', `${h} ${s}% ${l}%`)
+  document.documentElement.style.setProperty('--gradient-shoka-button-start', hex)
+  document.documentElement.style.setProperty('--gradient-shoka-button-end', hex)
 }
 
 const KoharuSearchModal = ({ isOpen, onClose }) => {
@@ -137,7 +212,7 @@ const KoharuThemeToggle = ({ className }) => {
 
   return (
     <button
-      className={`theme-toggle scale-80 cursor-pointer transition duration-300 hover:scale-90 ${className || ''}`}
+      className={`theme-toggle cursor-pointer transition duration-300 hover:scale-105 ${className || ''}`}
       tabIndex={0}
       aria-label='toggle theme'
       type='button'
@@ -148,81 +223,39 @@ const KoharuThemeToggle = ({ className }) => {
         stopEvent(e)
         toggleDarkMode()
       }}>
-      <label className='toggle block cursor-pointer' aria-label='toggle theme'>
-        <input type='checkbox' className='hidden' checked={isDarkMode} readOnly />
-        <div className='toggle-indicator' />
-      </label>
-
-      <style jsx>{`
-        .theme-toggle {
-          z-index: 10;
-          --theme-toggle-color: currentColor;
-        }
-
-        .toggle-indicator {
-          border-radius: 50%;
-          width: 36px;
-          height: 36px;
-          position: relative;
-          box-shadow: inset 16px -16px 0 0 var(--theme-toggle-color, #ffbb52);
-          transform: scale(1) rotate(-2deg);
-          transition:
-            box-shadow 0.5s ease 0s,
-            transform 0.4s ease 0.1s;
-        }
-
-        .toggle-indicator:before {
-          content: '';
-          width: inherit;
-          height: inherit;
-          border-radius: inherit;
-          position: absolute;
-          left: 0;
-          top: 0;
-          background: transparent;
-          transition: background 0.3s ease;
-        }
-
-        .toggle-indicator:after {
-          content: '';
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          margin: -4px 0 0 -4px;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          box-shadow:
-            0 -23px 0 var(--theme-toggle-color, #ffbb52),
-            0 23px 0 var(--theme-toggle-color, #ffbb52),
-            23px 0 0 var(--theme-toggle-color, #ffbb52),
-            -23px 0 0 var(--theme-toggle-color, #ffbb52),
-            15px 15px 0 var(--theme-toggle-color, #ffbb52),
-            -15px 15px 0 var(--theme-toggle-color, #ffbb52),
-            15px -15px 0 var(--theme-toggle-color, #ffbb52),
-            -15px -15px 0 var(--theme-toggle-color, #ffbb52);
-          transform: scale(0);
-          transition: all 0.3s ease;
-        }
-
-        .dark .toggle-indicator {
-          box-shadow: inset 32px -32px 0 0 var(--theme-background-color, #17181c);
-          transform: scale(0.5) rotate(0deg);
-          transition:
-            transform 0.3s ease 0.1s,
-            box-shadow 0.2s ease 0s;
-        }
-
-        .dark .toggle-indicator:before {
-          background: var(--theme-toggle-color, #ffbb52);
-          transition: background 0.3s ease 0.1s;
-        }
-
-        .dark .toggle-indicator:after {
-          transform: scale(1.5);
-          transition: transform 0.5s ease 0.15s;
-        }
-      `}</style>
+      {isDarkMode ? (
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          strokeWidth='2'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          className='w-6 h-6'>
+          <circle cx='12' cy='12' r='4' />
+          <path d='M12 2v2' />
+          <path d='M12 20v2' />
+          <path d='M4.93 4.93l1.41 1.41' />
+          <path d='M17.66 17.66l1.41 1.41' />
+          <path d='M2 12h2' />
+          <path d='M20 12h2' />
+          <path d='M6.34 17.66l-1.41 1.41' />
+          <path d='M19.07 4.93l-1.41 1.41' />
+        </svg>
+      ) : (
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          strokeWidth='2'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          className='w-6 h-6'>
+          <path d='M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z' />
+        </svg>
+      )}
     </button>
   )
 }
@@ -235,6 +268,7 @@ const KoharuThemeToggle = ({ className }) => {
 export const Header = props => {
   const router = useRouter()
   const { locale } = useGlobal()
+  const [themeColor, setThemeColor] = useState(CONFIG?.THEME_PRIMARY_COLOR || '#3c48f58c')
   const isHome =
     router?.pathname === '/' ||
     router?.pathname === '/page/[page]' ||
@@ -256,18 +290,23 @@ export const Header = props => {
   const [headerHeight, setHeaderHeight] = useState(0)
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
+    if (typeof window === 'undefined') return
+    const saved = window.localStorage?.getItem('mythemes_theme_color')
+    if (saved) {
+      setThemeColor(saved)
+      applyThemeColor(saved)
+    } else {
+      const fallback = CONFIG?.THEME_PRIMARY_COLOR || themeColor
+      if (fallback) {
+        setThemeColor(fallback)
+        applyThemeColor(fallback)
+      }
     }
-
     const media = window.matchMedia('(max-width: 719px)')
     const onChange = e => setIsMobile(!!e.matches)
     setIsMobile(!!media.matches)
     media.addEventListener?.('change', onChange)
-
-    return () => {
-      media.removeEventListener?.('change', onChange)
-    }
+    return () => media.removeEventListener?.('change', onChange)
   }, [])
 
   useEffect(() => {
@@ -614,7 +653,7 @@ export const Header = props => {
           <button
             type='button'
             aria-label='搜索'
-            className='cursor-pointer transition duration-300 hover:scale-110 md:hover:scale-125'
+            className='cursor-pointer transition duration-300 hover:scale-105 md:hover:scale-110'
             onPointerDown={stopEvent}
             onMouseDown={stopEvent}
             onTouchStart={stopEvent}
@@ -622,8 +661,28 @@ export const Header = props => {
               stopEvent(e)
               setSearchOpen(true)
             }}>
-            <SearchIcon className='w-7 h-7 md:w-8 md:h-8' />
+            <SearchIcon className='w-6 h-6 md:w-7 md:h-7' />
           </button>
+          <label
+            aria-label='主题颜色'
+            className={`relative cursor-pointer transition duration-300 hover:scale-105 md:hover:scale-110 ${isTransparentHome ? 'text-white' : ''}`}>
+            <PaletteIcon className='w-6 h-6' />
+            <input
+              type='color'
+              value={themeColor}
+              onClick={e => e?.stopPropagation?.()}
+              onChange={e => {
+                const val = e?.target?.value
+                if (!val) return
+                setThemeColor(val)
+                applyThemeColor(val)
+                if (typeof window !== 'undefined') {
+                  window.localStorage?.setItem('mythemes_theme_color', val)
+                }
+              }}
+              className='absolute inset-0 h-full w-full cursor-pointer opacity-0'
+            />
+          </label>
           <KoharuThemeToggle className={isTransparentHome ? 'text-white' : ''} />
         </div>
       </div>

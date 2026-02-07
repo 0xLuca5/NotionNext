@@ -122,11 +122,11 @@ const BlogItem = ({ post, index = 0 }) => {
                   : ' md:justify-end md:ml-16'
                 : ''
             }`}>
-            {tags.map(t => (
+            {tags.map((t, idx) => (
               <SmartLink
                 key={t}
                 href={`/tag/${encodeURIComponent(t)}`}
-                className='shrink-0 cursor-pointer gap-0.5 px-1 text-xs font-bold whitespace-nowrap transition-colors duration-300 flex items-center rounded bg-transparent text-[#c75b7c] hover:text-[#b34a6a] dark:text-[#f18bb3] dark:hover:text-[#ff9ec4]'>
+                className={`shrink-0 cursor-pointer gap-0.5 px-2 py-0.5 text-[10px] md:text-xs font-medium whitespace-nowrap transition-colors duration-300 flex items-center rounded bg-transparent text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)/0.12)] dark:hover:bg-[hsl(var(--primary)/0.16)] ${idx >= 3 ? 'hidden md:flex' : ''}`}>
                 <i className='fas fa-tags text-[10px]' /> {t}
               </SmartLink>
             ))}
