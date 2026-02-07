@@ -196,7 +196,7 @@ const Catalog = ({ toc, variant }) => {
                         marginLeft: tocItem.indentLevel * 16
                       }}
                       className={`truncate ${
-                        isActive ? ' font-bold text-red-400 underline' : ''
+                        isActive ? ' font-bold text-primary underline' : ''
                       }`}>
                       {tocItem.text}
                     </span>

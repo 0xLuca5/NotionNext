@@ -533,11 +533,11 @@ export const SideBar = props => {
             {list.slice(0, 10).map((p, idx) => {
               const isCurrent = (post?.id && p?.id === post.id) || p?.slug === post?.slug
               const dotClass = isCurrent
-                ? 'bg-[#ff5c7c]'
+                ? 'bg-primary'
                 : 'bg-black/30 dark:bg-white/30'
 
               const linkClass = isCurrent
-                ? 'text-[#ff5c7c]'
+                ? 'text-primary'
                 : 'text-gray-800/80 dark:text-gray-200/80'
 
               return (
@@ -576,11 +576,11 @@ export const SideBar = props => {
           {list.slice(0, 10).map((p, idx) => {
             const isCurrent = (post?.id && p?.id === post.id) || p?.slug === post?.slug
             const dotClass = isCurrent
-              ? 'bg-[#ff5c7c]'
+              ? 'bg-primary'
               : 'bg-black/30 dark:bg-white/30'
 
             const linkClass = isCurrent
-              ? 'text-[#ff5c7c]'
+              ? 'text-primary'
               : 'text-gray-800/80 dark:text-gray-200/80'
 
             return (
