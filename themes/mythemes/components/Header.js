@@ -5,6 +5,7 @@ import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { MenuList } from './MenuList'
+import { SideBar } from './SideBar'
 import CONFIG from '../config'
 
 const SearchIcon = ({ className }) => {
@@ -250,6 +251,7 @@ export const Header = props => {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [drawerMenuOpenMap, setDrawerMenuOpenMap] = useState({})
+  const [drawerTab, setDrawerTab] = useState('menu')
   const [isHidden, setIsHidden] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(0)
 
@@ -273,6 +275,13 @@ export const Header = props => {
       setDrawerOpen(false)
     }
   }, [isMobile])
+
+  useEffect(() => {
+    if (!drawerOpen) {
+      return
+    }
+    setDrawerTab(props?.post ? 'article' : 'menu')
+  }, [drawerOpen, props?.post])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -632,62 +641,69 @@ export const Header = props => {
         <button
           type='button'
           aria-label='关闭菜单'
-          className='absolute left-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-red-500 dark:bg-white/10'
+          className='absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-red-500 dark:bg-white/10'
           onClick={() => setDrawerOpen(false)}>
           <span className='text-2xl leading-none'>×</span>
         </button>
 
-        <div className='mt-10 flex flex-col items-center px-2'>
-          <div className='relative h-28 w-28 overflow-hidden rounded-full bg-black/5 shadow-card-darker dark:bg-white/10'>
-            <LazyImage
-              src={avatar}
-              alt='avatar'
-              className='hover-animate-shake h-full w-full rounded-full object-cover transition'
-            />
-          </div>
-          <p className='mt-3 text-base font-semibold text-gray-900 dark:text-gray-100'>
-            {authorName}
-          </p>
-          {description && (
-            <p className='mt-3 whitespace-pre-line text-center text-xs text-gray-700/80 dark:text-white/80'>
-              {description}
+        {!props?.post && (
+          <div className='mt-10 flex flex-col items-center px-2'>
+            <div className='relative h-28 w-28 overflow-hidden rounded-full bg-black/5 shadow-card-darker dark:bg-white/10'>
+              <LazyImage
+                src={avatar}
+                alt='avatar'
+                className='hover-animate-shake h-full w-full rounded-full object-cover transition'
+              />
+            </div>
+            <p className='mt-3 text-base font-semibold text-gray-900 dark:text-gray-100'>
+              {authorName}
             </p>
-          )}
+            {description && (
+              <p className='mt-3 whitespace-pre-line text-center text-xs text-gray-700/80 dark:text-white/80'>
+                {description}
+              </p>
+            )}
 
-          <SocialIcons />
+            <SocialIcons />
 
-          <div className='mt-4 flex justify-center text-center text-sm/4 whitespace-nowrap select-none text-gray-700/80 dark:text-white/80'>
-            <SmartLink
-              href='/'
-              className='hover:text-blue-500 flex cursor-pointer flex-col gap-2 p-1 transition'>
-              <span className='text-lg/5 font-bold text-gray-900 dark:text-gray-100'>
-                {postCount}
-              </span>
-              文章
-            </SmartLink>
-            <div className='mx-3 w-px bg-black/10 dark:bg-white/20' />
-            <SmartLink
-              href='/category'
-              className='hover:text-blue-500 flex cursor-pointer flex-col gap-2 p-1 transition'>
-              <span className='text-lg/5 font-bold text-gray-900 dark:text-gray-100'>
-                {categoryCount}
-              </span>
-              分类
-            </SmartLink>
-            <div className='mx-3 w-px bg-black/10 dark:bg-white/20' />
-            <SmartLink
-              href='/tag'
-              className='hover:text-blue-500 flex cursor-pointer flex-col gap-2 p-1 transition'>
-              <span className='text-lg/5 font-bold text-gray-900 dark:text-gray-100'>
-                {tagCount}
-              </span>
-              标签
-            </SmartLink>
+            <div className='mt-4 flex justify-center text-center text-sm/4 whitespace-nowrap select-none text-gray-700/80 dark:text-white/80'>
+              <SmartLink
+                href='/'
+                className='hover:text-blue-500 flex cursor-pointer flex-col gap-2 p-1 transition'>
+                <span className='text-lg/5 font-bold text-gray-900 dark:text-gray-100'>
+                  {postCount}
+                </span>
+                文章
+              </SmartLink>
+              <div className='mx-3 w-px bg-black/10 dark:bg-white/20' />
+              <SmartLink
+                href='/category'
+                className='hover:text-blue-500 flex cursor-pointer flex-col gap-2 p-1 transition'>
+                <span className='text-lg/5 font-bold text-gray-900 dark:text-gray-100'>
+                  {categoryCount}
+                </span>
+                分类
+              </SmartLink>
+              <div className='mx-3 w-px bg-black/10 dark:bg-white/20' />
+              <SmartLink
+                href='/tag'
+                className='hover:text-blue-500 flex cursor-pointer flex-col gap-2 p-1 transition'>
+                <span className='text-lg/5 font-bold text-gray-900 dark:text-gray-100'>
+                  {tagCount}
+                </span>
+                标签
+              </SmartLink>
+            </div>
           </div>
-        </div>
+        )}
 
-        <nav className='mt-6 flex w-full flex-col items-center gap-2.5 pb-10'>
-          {drawerLinks.map((item, index) => {
+        {props?.post ? (
+          <div className='mt-12 w-full pb-10'>
+            <SideBar {...props} post={props.post} />
+          </div>
+        ) : (
+          <nav className='mt-6 flex w-full flex-col items-center gap-2.5 pb-10'>
+            {drawerLinks.map((item, index) => {
             const hasSubMenu = Array.isArray(item?.subMenus) && item.subMenus.length > 0
             const isActive = item?.href && activePath === item.href
             const isOpen = !!drawerMenuOpenMap?.[index]
@@ -770,8 +786,9 @@ export const Header = props => {
                 </div>
               </div>
             )
-          })}
-        </nav>
+            })}
+          </nav>
+        )}
       </div>
 
       <KoharuSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

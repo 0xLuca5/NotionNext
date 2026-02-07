@@ -13,32 +13,49 @@ const Catalog = ({ toc, variant }) => {
   useEffect(() => {
     window.addEventListener('scroll', actionSectionScrollSpy)
     actionSectionScrollSpy()
+    const onHashChange = () => {
+      const hash = window?.location?.hash
+      const id = hash ? hash.replace(/^#/, '') : null
+      if (id) {
+        setActiveSection(id)
+      }
+    }
+    window.addEventListener('hashchange', onHashChange)
     return () => {
       window.removeEventListener('scroll', actionSectionScrollSpy)
+      window.removeEventListener('hashchange', onHashChange)
     }
   }, [])
 
   // 目录自动滚动
   const tRef = useRef(null)
   const tocIdsRef = useRef([])
+  const manualActiveRef = useRef(null)
+  const manualLockUntilRef = useRef(0)
 
   // 同步选中目录事件
   const [activeSection, setActiveSection] = useState(null)
   const throttleMs = 200
   const actionSectionScrollSpy = useCallback(
     throttle(() => {
+      // 点击目录触发的平滑滚动过程中，短暂锁定高亮，避免被 scrollSpy 覆盖到上一节
+      if (Date.now() < manualLockUntilRef.current && manualActiveRef.current) {
+        const locked = manualActiveRef.current
+        setActiveSection(prev => (prev === locked ? prev : locked))
+        const index = tocIdsRef.current.indexOf(locked) || 0
+        tRef?.current?.scrollTo({ top: 28 * index, behavior: 'smooth' })
+        return
+      }
+
       const sections = document.getElementsByClassName('notion-h')
       let prevBBox = null
-      let currentSectionId = activeSection
+      let currentSectionId = null
       for (let i = 0; i < sections.length; ++i) {
         const section = sections[i]
         if (!section || !(section instanceof Element)) continue
-        if (!currentSectionId) {
-          currentSectionId = section.getAttribute('data-id')
-        }
+        if (!currentSectionId) currentSectionId = section.getAttribute('data-id')
         const bbox = section.getBoundingClientRect()
-        const prevHeight = prevBBox ? bbox.top - prevBBox.bottom : 0
-        const offset = Math.max(150, prevHeight / 4)
+        const offset = 120
         // GetBoundingClientRect returns values relative to viewport
         if (bbox.top - offset < 0) {
           currentSectionId = section.getAttribute('data-id')
@@ -48,7 +65,11 @@ const Catalog = ({ toc, variant }) => {
         // No need to continue loop, if last element has been detected
         break
       }
-      setActiveSection(currentSectionId)
+      if (!currentSectionId) return
+      setActiveSection(prev => {
+        if (prev === currentSectionId) return prev
+        return currentSectionId
+      })
       const index = tocIdsRef.current.indexOf(currentSectionId) || 0
       tRef?.current?.scrollTo({ top: 28 * index, behavior: 'smooth' })
     }, throttleMs)
@@ -116,6 +137,28 @@ const Catalog = ({ toc, variant }) => {
       return next
     })
   }, [])
+
+  const onTocNavigate = useCallback(
+    (id, parentId) => {
+      if (id) {
+        setActiveSection(id)
+        setTimeout(() => {
+          setActiveSection(id)
+        }, 0)
+        manualActiveRef.current = id
+        manualLockUntilRef.current = Date.now() + 1200
+      }
+      if (isPostVariant && parentId) {
+        setExpandedParents(prev => {
+          if (prev.has(parentId)) return prev
+          const next = new Set(prev)
+          next.add(parentId)
+          return next
+        })
+      }
+    },
+    [isPostVariant]
+  )
 
   return (
     <div className={isPostVariant ? '' : 'px-3'}>
@@ -194,6 +237,7 @@ const Catalog = ({ toc, variant }) => {
 
                     <a
                       href={`#${parentId}`}
+                      onClick={() => onTocNavigate(parentId, parentId)}
                       className={`catalog-item catalog-item-level-${
                         parent.indentLevel || 0
                       } block flex-1 rounded-md px-2 py-1 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/10 ${
@@ -218,6 +262,7 @@ const Catalog = ({ toc, variant }) => {
                           <a
                             key={childId}
                             href={`#${childId}`}
+                            onClick={() => onTocNavigate(childId, parentId)}
                             className={`catalog-item ${levelClass} block rounded-md px-2 py-1 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/10 ${
                               isActive
                                 ? 'text-primary font-medium'

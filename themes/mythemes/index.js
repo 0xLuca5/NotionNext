@@ -26,7 +26,7 @@ import LazyImage from '@/components/LazyImage'
 
 import { useRouter } from 'next/router'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { countWords } from '@/lib/plugins/wordCount'
 import WordCount from '@/components/WordCount'
@@ -333,6 +333,38 @@ const LayoutBase = props => {
 
   const router = useRouter()
 
+  const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const media = window.matchMedia('(max-width: 767px)')
+    const onChange = e => setIsMobile(!!e.matches)
+    setIsMobile(!!media.matches)
+    media.addEventListener?.('change', onChange)
+    return () => media.removeEventListener?.('change', onChange)
+  }, [])
+
+  useEffect(() => {
+    if (!isMobile) {
+      setSidebarDrawerOpen(false)
+    }
+  }, [isMobile])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    document.body.style.overflow = sidebarDrawerOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [sidebarDrawerOpen])
+
+  useEffect(() => {
+    const close = () => setSidebarDrawerOpen(false)
+    router?.events?.on?.('routeChangeStart', close)
+    return () => router?.events?.off?.('routeChangeStart', close)
+  }, [router?.events])
+
   const isHome =
 
     router?.pathname === '/' ||
@@ -354,10 +386,11 @@ const LayoutBase = props => {
     ) : null)
 
   const slotSider = props.slotSider || <SideBar {...props} />
+  const effectiveSider = post ? <SideBar {...props} post={post} /> : slotSider
 
 
 
-  const hasSider = Boolean(slotSider)
+  const hasSider = Boolean(effectiveSider)
 
 
 
@@ -373,116 +406,95 @@ const LayoutBase = props => {
 
   const LAYOUT_SIDEBAR_REVERSE = siteConfig('LAYOUT_SIDEBAR_REVERSE', false)
 
-
-
   return (
-
     <div
-
       id='theme-mythemes'
-
-      className={`${siteConfig('FONT_STYLE')} dark:text-gray-300 scroll-smooth`}>
-
+      className={`${siteConfig('FONT_STYLE')} dark:text-gray-300 scroll-smooth`}
+    >
       <Style />
 
-
-
       {/* 页头 */}
-
       <Header {...props} />
-
       {/* 标题栏 */}
       {!post && <TitleBar {...props} />}
 
-
-
       {slotCover}
 
-
-
       {/* 主体 */}
-
       <div id='container-inner' className='w-full relative z-10'>
-
         <div
-
           id='container-wrapper'
-
           className={`relative mx-auto justify-center md:flex py-8 ${hasSider ? 'max-w-7xl' : ''}
-
-          ${LAYOUT_SIDEBAR_REVERSE ? 'flex-row-reverse' : ''} 
-
-          ${LAYOUT_VERTICAL ? 'items-center flex-col' : 'items-start'} 
-
-          `}>
-
+          ${LAYOUT_SIDEBAR_REVERSE ? 'flex-row-reverse' : ''}
+          ${LAYOUT_VERTICAL ? 'items-center flex-col' : 'items-start'}
+          `}
+        >
           {hasSider && (
-
             <aside className='hidden md:block w-64 min-w-64 max-w-64 px-2 sticky top-[calc(var(--mythemes-header-offset)+2rem)] self-start '>
-
-              {slotSider}
-
+              {effectiveSider}
             </aside>
-
           )}
 
           {/* 内容 */}
-
           <div
-
             className={`${hasSider ? 'min-w-0 grow' : 'max-w-7xl'} ${
-
               fullWidth ? '' : LAYOUT_VERTICAL ? 'max-w-5xl' : ''
-
-            } w-full px-4 md:px-6`}>
-
+            } w-full px-4 md:px-6`}
+          >
             <Transition
-
               show={!onLoading}
-
               appear={true}
-
               enter='transition ease-in-out duration-700 transform order-first'
-
               enterFrom='opacity-0 translate-y-16'
-
               enterTo='opacity-100'
-
               leave='transition ease-in-out duration-300 transform'
-
               leaveFrom='opacity-100 translate-y-0'
-
               leaveTo='opacity-0 -translate-y-16'
-
-              unmount={false}>
-
+              unmount={false}
+            >
               {/* 嵌入模块 */}
-
               {props.slotTop}
 
               {children}
-
             </Transition>
-
           </div>
-
-
-
         </div>
-
       </div>
 
+      {post && isMobile && hasSider && (
+        <>
+          <button
+            type='button'
+            aria-label='toggle-sidebar'
+            onClick={() => setSidebarDrawerOpen(v => !v)}
+            className='fixed left-4 bottom-4 z-30 rounded-full bg-white/85 backdrop-blur px-4 py-3 text-gray-800 shadow-card dark:bg-black/60 dark:text-gray-100'
+          >
+            <i className='fas fa-bars' />
+          </button>
 
+          <div
+            className={`fixed inset-0 z-40 ${sidebarDrawerOpen ? '' : 'pointer-events-none'}`}
+          >
+            <div
+              id='sidebar-drawer-background'
+              onClick={() => setSidebarDrawerOpen(false)}
+              className={`absolute inset-0 transition-opacity duration-300 ${
+                sidebarDrawerOpen ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
 
-      {/* Live2D */}
+            <aside
+              id='sidebar-drawer'
+              className={`absolute left-0 top-[var(--mythemes-header-offset)] h-[calc(100dvh-var(--mythemes-header-offset))] w-[82vw] max-w-[360px] overflow-y-auto px-3 py-4 transition-transform duration-300 ${
+                sidebarDrawerOpen ? 'translate-x-0' : '-translate-x-full'
+              }`}
+            >
+              {effectiveSider}
+            </aside>
+          </div>
+        </>
 
-      <div className='hidden md:block fixed left-4 bottom-4 z-20'>
-
-        <Live2D />
-
-      </div>
-
-
+      )}
 
       {/* 页脚 */}
 
