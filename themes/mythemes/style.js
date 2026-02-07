@@ -660,24 +660,6 @@ const Style = () => {
     }
 
     .post-toc-nav {
-      counter-reset: post-toc;
-    }
-
-    .post-toc-nav .catalog-item-level-0 {
-      counter-increment: post-toc;
-    }
-
-    .post-toc-nav .catalog-item-level-0::before {
-      content: counter(post-toc) '. ';
-      display: inline-block;
-      width: 2rem;
-      margin-left: -2rem;
-      font-variant-numeric: tabular-nums;
-      color: hsl(var(--foreground) / 0.35);
-    }
-
-    .dark .post-toc-nav .catalog-item-level-0::before {
-      color: hsl(var(--foreground) / 0.3);
     }
 
   `}</style>
