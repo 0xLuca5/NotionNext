@@ -600,7 +600,7 @@ export const Header = props => {
             <a className='logo -my-1 flex cursor-pointer items-center justify-center whitespace-nowrap no-underline md:mr-2 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0'>
               <LazyImage
                 src={brandLogo}
-                alt='COSINE'
+                alt='LUCAS'
                 className='h-10 md:h-12 w-auto object-contain'
               />
             </a>

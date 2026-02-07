@@ -131,36 +131,37 @@ const PostCover = props => {
       <div className='absolute inset-0 h-full bg-black/40' />
 
       <div className='absolute inset-0 bottom-[8vh] flex flex-col items-center justify-center px-5 text-white'>
-        <h1 className='shadow-text text-center text-5xl/[1.2] font-bold tracking-widest max-w-7xl'>
+        <h1 className='shadow-text text-center text-4xl/[1.2] md:text-5xl/[1.2] font-bold tracking-widest max-w-7xl'>
           {title}
         </h1>
 
         {description && <p className='shadow-text mt-4 text-sm'>= {description} =</p>}
 
-        <section className='flex-wrap shadow-text-md flex text-sm justify-center mt-4 text-white font-light leading-8'>
-          <div className='flex justify-center'>
+        <section className='shadow-text-md flex flex-wrap items-center text-sm justify-center mt-4 text-white font-light leading-8 gap-x-2 gap-y-1'>
+          <div className='flex flex-wrap justify-center'>
             <div className='mr-2'>
               <WordCount wordCount={wordCount} readTime={readTime} />
             </div>
-            {post?.type !== 'Page' && (
-              <SmartLink
-                href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-                passHref
-                className='pl-1 mr-2 cursor-pointer hover:underline'>
-                <i className='fa-regular fa-calendar' /> {post?.publishDay}
-              </SmartLink>
-            )}
-            <div className='pl-1 mr-2'>
-              <i className='fa-regular fa-calendar-check' /> {post?.lastEditedDay}
+            <div className='flex flex-nowrap items-center justify-center'>
+              {post?.type !== 'Page' && (
+                <SmartLink
+                  href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                  passHref
+                  className='pl-1 mr-2 cursor-pointer hover:underline whitespace-nowrap'>
+                  <i className='fa-regular fa-calendar' /> {post?.publishDay}
+                </SmartLink>
+              )}
+              <div className='pl-1 mr-2 whitespace-nowrap'>
+                <i className='fa-regular fa-calendar-check' /> {post?.lastEditedDay}
+              </div>
+              {ANALYTICS_BUSUANZI_ENABLE && (
+                <div className='busuanzi_container_page_pv font-light mr-2 whitespace-nowrap'>
+                  <i className='fa-solid fa-fire-flame-curved' />{' '}
+                  <span className='mr-2 busuanzi_value_page_pv' />
+                </div>
+              )}
             </div>
           </div>
-
-          {ANALYTICS_BUSUANZI_ENABLE && (
-            <div className='busuanzi_container_page_pv font-light mr-2'>
-              <i className='fa-solid fa-fire-flame-curved' />{' '}
-              <span className='mr-2 busuanzi_value_page_pv' />
-            </div>
-          )}
         </section>
       </div>
 
@@ -271,7 +272,7 @@ const HomeCover = props => {
 
       <div className='absolute inset-0 bottom-[8vh] flex flex-col items-center justify-center px-5 text-white'>
 
-        <h1 className='shadow-text text-center text-5xl/[1.2] font-bold tracking-widest max-w-7xl'>
+        <h1 className='shadow-text text-center text-4xl/[1.2] md:text-5xl/[1.2] font-bold tracking-widest max-w-7xl'>
 
           {title}
 
