@@ -15,6 +15,7 @@ import { DynamicLayout } from '@/themes/theme'
 import { generateRedirectJson } from '@/lib/redirect'
 
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
+import { enrichPostsWordCountReadTime } from '@/lib/utils/post'
 
 
 
@@ -82,11 +83,7 @@ export async function getStaticProps(req) {
 
     )
 
-    console.log('Found recommended posts:', recommendedPosts.length)
-
     recommendedPosts.forEach((post, index) => {
-
-      console.log(`Recommended ${index + 1}: ${post.title}`)
 
     })
 
@@ -97,6 +94,14 @@ export async function getStaticProps(req) {
     props.recommendPosts = []
 
   }
+
+  // 补齐列表页的字数/阅读时长（与文章页口径一致：基于正文全文）
+  // 注意：scroll 模式下 posts 可能是全量，避免一次性计算过慢，仅计算前 POSTS_PER_PAGE 篇
+  const POSTS_PER_PAGE = siteConfig('POSTS_PER_PAGE', 12, props?.NOTION_CONFIG)
+  await enrichPostsWordCountReadTime(props.posts, {
+    from: 'list-wordcount',
+    limit: POSTS_PER_PAGE
+  })
 
 
 

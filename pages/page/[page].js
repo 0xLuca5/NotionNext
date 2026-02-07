@@ -2,6 +2,7 @@ import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { getGlobalData, getPostBlocks } from '@/lib/db/getSiteData'
 import { DynamicLayout } from '@/themes/theme'
+import { enrichPostsWordCountReadTime } from '@/lib/utils/post'
 
 /**
  * 文章列表分页
@@ -48,6 +49,9 @@ export async function getStaticProps({ params: { page }, locale }) {
     POSTS_PER_PAGE * page
   )
   props.page = page
+
+  // 补齐列表页的字数/阅读时长（与文章页口径一致：基于正文全文）
+  await enrichPostsWordCountReadTime(props.posts, { from: 'list-wordcount' })
 
   // 处理预览
   if (siteConfig('POST_LIST_PREVIEW', false, props?.NOTION_CONFIG)) {

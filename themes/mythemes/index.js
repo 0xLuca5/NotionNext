@@ -534,12 +534,7 @@ const LayoutIndex = props => {
 
   const noticePost = props?.notice
 
-  const noticeHref =
-    noticePost?.href && noticePost.href !== '#'
-      ? noticePost.href
-      : noticePost?.slug
-        ? `/${String(noticePost.slug).replace(/^\/+/, '')}`
-        : null
+  const noticeHref = noticePost?.href || (noticePost?.slug ? `/post/${noticePost.slug}` : null)
 
   const noticeCover =
 
@@ -549,9 +544,25 @@ const LayoutIndex = props => {
 
   
 
-  const noticeWordCount = Number.isFinite(noticePost?.wordCount) ? noticePost.wordCount : 0
+  // 计算字数和阅读时间（如果没有的话）
 
-  const noticeReadTime = Number.isFinite(noticePost?.readTime) ? noticePost.readTime : 0
+  const postDescription = noticePost?.summary || noticePost?.description || ''
+
+  const metaText = `${noticePost?.title || ''} ${postDescription}`.trim()
+
+  const estimated = metaText ? countWords(metaText) : { wordCount: 0, readTime: 0 }
+
+  const noticeWordCount = Number.isFinite(noticePost?.wordCount) && noticePost.wordCount > 0
+
+    ? noticePost.wordCount
+
+    : estimated.wordCount
+
+  const noticeReadTime = Number.isFinite(noticePost?.readTime) && noticePost.readTime > 0
+
+    ? noticePost.readTime
+
+    : estimated.readTime
 
 
 

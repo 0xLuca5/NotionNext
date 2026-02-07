@@ -1,6 +1,6 @@
 import throttle from 'lodash.throttle'
 import { uuidToId } from 'notion-utils'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 /**
  * 目录导航组件
@@ -20,7 +20,7 @@ const Catalog = ({ toc, variant }) => {
 
   // 目录自动滚动
   const tRef = useRef(null)
-  const tocIds = []
+  const tocIdsRef = useRef([])
 
   // 同步选中目录事件
   const [activeSection, setActiveSection] = useState(null)
@@ -49,7 +49,7 @@ const Catalog = ({ toc, variant }) => {
         break
       }
       setActiveSection(currentSectionId)
-      const index = tocIds.indexOf(currentSectionId) || 0
+      const index = tocIdsRef.current.indexOf(currentSectionId) || 0
       tRef?.current?.scrollTo({ top: 28 * index, behavior: 'smooth' })
     }, throttleMs)
   )
@@ -60,6 +60,62 @@ const Catalog = ({ toc, variant }) => {
   }
 
   const isPostVariant = variant === 'post'
+
+  const { tocGroups, parentIdById } = useMemo(() => {
+    const groups = []
+    const parentMap = new Map()
+    if (!Array.isArray(toc) || toc.length === 0) {
+      return { tocGroups: groups, parentIdById: parentMap }
+    }
+
+    let currentGroup = null
+    for (const item of toc) {
+      const level = Number.isFinite(item?.indentLevel) ? item.indentLevel : 0
+      if (level <= 0 || !currentGroup) {
+        currentGroup = { parent: item, children: [] }
+        groups.push(currentGroup)
+      } else {
+        currentGroup.children.push(item)
+      }
+    }
+
+    for (const group of groups) {
+      const parentId = uuidToId(group.parent.id)
+      parentMap.set(parentId, parentId)
+      for (const child of group.children) {
+        parentMap.set(uuidToId(child.id), parentId)
+      }
+    }
+
+    return { tocGroups: groups, parentIdById: parentMap }
+  }, [toc])
+
+  const [expandedParents, setExpandedParents] = useState(() => new Set())
+
+  useEffect(() => {
+    if (!isPostVariant) return
+    if (!activeSection) return
+    const parentId = parentIdById.get(activeSection)
+    if (!parentId) return
+    setExpandedParents(prev => {
+      if (prev.has(parentId)) return prev
+      const next = new Set(prev)
+      next.add(parentId)
+      return next
+    })
+  }, [activeSection, isPostVariant, parentIdById])
+
+  const toggleParent = useCallback(parentId => {
+    setExpandedParents(prev => {
+      const next = new Set(prev)
+      if (next.has(parentId)) {
+        next.delete(parentId)
+      } else {
+        next.add(parentId)
+      }
+      return next
+    })
+  }, [])
 
   return (
     <div className={isPostVariant ? '' : 'px-3'}>
@@ -76,47 +132,117 @@ const Catalog = ({ toc, variant }) => {
               ? 'post-toc-nav h-full text-gray-800 dark:text-gray-200'
               : 'h-full  text-black dark:text-gray-300'
           }>
-          {toc.map(tocItem => {
-            const id = uuidToId(tocItem.id)
-            tocIds.push(id)
-            const isActive = activeSection === id
-            const levelClass = `catalog-item-level-${tocItem.indentLevel || 0}`
-            return (
-              <a
-                key={id}
-                href={`#${id}`}
-                className={
-                  isPostVariant
-                    ? `catalog-item ${levelClass} block rounded-md px-2 py-1 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/10 ${
-                        isActive ? 'text-primary font-medium' : 'text-gray-800/80 dark:text-gray-200/80'
-                      }`
-                    : `notion-table-of-contents-item duration-300 transform font-light
-              notion-table-of-contents-item-indent-level-${tocItem.indentLevel} catalog-item `
-                }>
-                {isPostVariant ? (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      marginLeft: tocItem.indentLevel * 16
-                    }}
-                    className='truncate'>
-                    {tocItem.text}
-                  </span>
-                ) : (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      marginLeft: tocItem.indentLevel * 16
-                    }}
-                    className={`truncate ${
-                      activeSection === id ? ' font-bold text-red-400 underline' : ''
-                    }`}>
-                    {tocItem.text}
-                  </span>
-                )}
-              </a>
-            )
-          })}
+          {(() => {
+            const ids = []
+
+            if (!isPostVariant) {
+              const nodes = toc.map(tocItem => {
+                const id = uuidToId(tocItem.id)
+                ids.push(id)
+                const isActive = activeSection === id
+                const levelClass = `catalog-item-level-${tocItem.indentLevel || 0}`
+                return (
+                  <a
+                    key={id}
+                    href={`#${id}`}
+                    className={`notion-table-of-contents-item duration-300 transform font-light
+              notion-table-of-contents-item-indent-level-${tocItem.indentLevel} catalog-item `}>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        marginLeft: tocItem.indentLevel * 16
+                      }}
+                      className={`truncate ${
+                        isActive ? ' font-bold text-red-400 underline' : ''
+                      }`}>
+                      {tocItem.text}
+                    </span>
+                  </a>
+                )
+              })
+
+              tocIdsRef.current = ids
+              return nodes
+            }
+
+            const nodes = []
+            tocGroups.forEach(group => {
+              const parent = group.parent
+              const parentId = uuidToId(parent.id)
+              const hasChildren = group.children.length > 0
+              const expanded = expandedParents.has(parentId)
+              const isActiveParent = activeSection === parentId
+
+              ids.push(parentId)
+
+              nodes.push(
+                <div key={parentId}>
+                  <div className='flex items-center gap-1'>
+                    {hasChildren && (
+                      <button
+                        type='button'
+                        onClick={() => toggleParent(parentId)}
+                        className='shrink-0 rounded px-1 py-1 text-gray-800/70 hover:bg-black/5 dark:text-gray-200/70 dark:hover:bg-white/10'
+                        aria-label={expanded ? 'collapse' : 'expand'}>
+                        <i
+                          className={`fas fa-chevron-right text-xs transition-transform ${
+                            expanded ? 'rotate-90' : ''
+                          }`}
+                        />
+                      </button>
+                    )}
+
+                    <a
+                      href={`#${parentId}`}
+                      className={`catalog-item catalog-item-level-${
+                        parent.indentLevel || 0
+                      } block flex-1 rounded-md px-2 py-1 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/10 ${
+                        isActiveParent
+                          ? 'text-primary font-medium'
+                          : 'text-gray-800/80 dark:text-gray-200/80'
+                      }`}>
+                      <span className='truncate'>{parent.text}</span>
+                    </a>
+                  </div>
+
+                  {hasChildren && expanded && (
+                    <div className='mt-1'>
+                      {group.children.map(child => {
+                        const childId = uuidToId(child.id)
+                        ids.push(childId)
+                        const isActive = activeSection === childId
+                        const levelClass = `catalog-item-level-${
+                          child.indentLevel || 1
+                        }`
+                        return (
+                          <a
+                            key={childId}
+                            href={`#${childId}`}
+                            className={`catalog-item ${levelClass} block rounded-md px-2 py-1 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/10 ${
+                              isActive
+                                ? 'text-primary font-medium'
+                                : 'text-gray-800/80 dark:text-gray-200/80'
+                            }`}>
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                marginLeft: (child.indentLevel || 1) * 16
+                              }}
+                              className='truncate'>
+                              {child.text}
+                            </span>
+                          </a>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })
+
+            tocIdsRef.current = ids
+            return nodes
+          })()}
         </nav>
       </div>
     </div>
