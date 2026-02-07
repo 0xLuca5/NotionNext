@@ -8,7 +8,7 @@ const CONFIG = {
     '必有回响',
     '欢迎来到我的博客🎉'
   ], // 首页大图标语文字
-  THEME_PRIMARY_COLOR: 'rgb(50, 112, 205)',
+  THEME_PRIMARY_COLOR: '#3270CD',
   SHOW_AUTHOR_DESCRIPTION: true,
   AUTHOR_DESCRIPTION: 'FullStack / 创作者 / 碳基生物',
   // 菜单配置
