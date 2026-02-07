@@ -187,6 +187,10 @@ const HomeCover = props => {
 
   const bannerImage = props?.siteInfo?.pageCover || siteConfig('HOME_BANNER_IMAGE')
 
+   const bannerImagePosition =
+    typeof props?.siteInfo?.pageCoverPosition === 'number'
+      ? props.siteInfo.pageCoverPosition
+      : 0.5
 
 
   useEffect(() => {
@@ -288,13 +292,10 @@ const HomeCover = props => {
       <div className='relative -z-10 h-full min-h-60 w-full'>
 
         <LazyImage
-
           src={bannerImage}
-
           className='h-full w-full object-cover'
-
+          style={{ objectPosition: `50% ${(1 - bannerImagePosition) * 100}%` }}
           alt='cover'
-
         />
 
       </div>
