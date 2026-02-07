@@ -7,6 +7,20 @@ import dynamic from 'next/dynamic'
 import { useEffect, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
 
+const ensureNotionHeadingAnchors = () => {
+  if (!isBrowser) return
+  const headings = document.getElementsByClassName('notion-h')
+  if (!headings || headings.length === 0) return
+  for (const h of headings) {
+    if (!h || !(h instanceof Element)) continue
+    const dataId = h.getAttribute('data-id')
+    if (!dataId) continue
+    if (!h.getAttribute('id')) {
+      h.setAttribute('id', dataId)
+    }
+  }
+}
+
 /**
  * 整个站点的核心组件
  * 将Notion数据渲染成网页
@@ -33,6 +47,8 @@ const NotionPage = ({ post, className }) => {
   useEffect(() => {
     // 检测当前的url并自动滚动到对应目标
     autoScrollToHash()
+    // 确保标题具备 id，hash 跳转才能生效
+    setTimeout(() => ensureNotionHeadingAnchors(), 0)
   }, [])
 
   // 页面文章发生变化时会执行的勾子
@@ -80,8 +96,12 @@ const NotionPage = ({ post, className }) => {
       attributeFilter: ['class']
     })
 
+    // NotionRenderer 渲染是异步的，这里延迟一帧补齐 heading 的 id
+    const anchorTimer = setTimeout(() => ensureNotionHeadingAnchors(), 60)
+
     return () => {
       observer.disconnect()
+      clearTimeout(anchorTimer)
     }
   }, [post])
 
