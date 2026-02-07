@@ -71,7 +71,7 @@ const KoharuSearchModal = ({ isOpen, onClose }) => {
         onClick={() => onClose?.()}
       />
       <div className='fixed inset-0 grid place-items-center px-4'>
-        <div className='w-full max-w-2xl overflow-hidden rounded-xl  shadow-box'>
+        <div className='w-full max-w-2xl overflow-hidden rounded-xl bg-white dark:bg-[#0b0f1a] shadow-box'>
           <div className='p-6 md:p-4'>
             <div className='flex items-center justify-between'>
               <h2 className='flex items-center gap-2 font-semibold text-lg md:text-base text-gray-900 dark:text-gray-100'>
@@ -592,7 +592,7 @@ export const Header = props => {
               <LazyImage
                 src={brandLogo}
                 alt='COSINE'
-                className='h-7 md:h-12 w-auto object-contain'
+                className='h-10 md:h-12 w-auto object-contain'
               />
             </a>
           </SmartLink>
@@ -642,7 +642,7 @@ export const Header = props => {
             <LazyImage
               src={avatar}
               alt='avatar'
-              className='h-full w-full rounded-full object-cover'
+              className='hover-animate-shake h-full w-full rounded-full object-cover transition'
             />
           </div>
           <p className='mt-3 text-base font-semibold text-gray-900 dark:text-gray-100'>

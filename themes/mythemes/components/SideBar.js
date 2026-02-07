@@ -468,7 +468,7 @@ export const SideBar = props => {
             <LazyImage
               src={avatar}
               alt='avatar'
-              className='h-full w-full object-cover rounded-full'
+              className='hover-animate-shake h-full w-full object-cover rounded-full transition'
             />
           </div>
           <p className='mt-3 text-base font-semibold text-gray-900 dark:text-gray-100'>{authorName}</p>

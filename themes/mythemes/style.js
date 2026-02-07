@@ -616,6 +616,49 @@ const Style = () => {
       width: 100%;
     }
 
+    @media (prefers-reduced-motion: no-preference) {
+      @keyframes shake {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+
+        10% {
+          transform: rotate(2deg);
+        }
+
+        15%,
+        25%,
+        35% {
+          transform: rotate(-4deg);
+        }
+
+        20%,
+        30%,
+        40% {
+          transform: rotate(4deg);
+        }
+
+        45% {
+          transform: rotate(-2deg);
+        }
+
+        50% {
+          transform: rotate(2deg);
+        }
+
+        55%,
+        90% {
+          transform: rotate(0deg);
+        }
+      }
+
+      .hover-animate-shake:hover {
+        animation: shake 0.82s both;
+        transform-origin: center;
+      }
+    }
+
   `}</style>
 }
 
