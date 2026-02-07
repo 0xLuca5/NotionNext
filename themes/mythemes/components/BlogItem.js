@@ -3,7 +3,6 @@ import NotionIcon from '@/components/NotionIcon'
 import TwikooCommentCount from '@/components/TwikooCommentCount'
 import { siteConfig } from '@/lib/config'
 import SmartLink from '@/components/SmartLink'
-import { countWords } from '@/lib/plugins/wordCount'
 import CONFIG from '../config'
 
 /**
@@ -22,14 +21,8 @@ const BlogItem = ({ post, index = 0 }) => {
     : []
 
   const postDescription = post?.summary || post?.description || ''
-  const metaText = `${post?.title || ''} ${postDescription}`.trim()
-  const estimated = metaText ? countWords(metaText) : { wordCount: 0, readTime: 0 }
-  const wordCount = Number.isFinite(post?.wordCount)
-    ? post.wordCount
-    : estimated.wordCount
-  const readTime = Number.isFinite(post?.readTime)
-    ? post.readTime
-    : estimated.readTime
+  const wordCount = Number.isFinite(post?.wordCount) ? post.wordCount : 0
+  const readTime = Number.isFinite(post?.readTime) ? post.readTime : 0
   const dateText = post?.date?.start_date || post?.publishDay || post?.createdTime
 
   // showPageCover 是图片 URL，需要转换为布尔值

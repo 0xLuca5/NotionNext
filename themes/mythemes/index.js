@@ -29,6 +29,8 @@ import { useRouter } from 'next/router'
 import { useEffect, useRef } from 'react'
 
 import { countWords } from '@/lib/plugins/wordCount'
+import WordCount from '@/components/WordCount'
+import { formatDateFmt } from '@/lib/utils/formatDate'
 
 import BlogListArchive from './components/BlogListArchive'
 
@@ -106,6 +108,71 @@ const WaveSvg = () => {
 
   )
 
+}
+
+
+const PostCover = props => {
+  const { post, siteInfo } = props
+  const title = post?.title || siteInfo?.title || siteConfig('TITLE')
+  const description = post?.description || ''
+  const ANALYTICS_BUSUANZI_ENABLE = siteConfig('ANALYTICS_BUSUANZI_ENABLE')
+  const bannerImage =
+    post?.pageCoverThumbnail ||
+    post?.pageCover ||
+    post?.pageCoverUrl ||
+    siteInfo?.pageCover ||
+    siteConfig('HOME_BANNER_IMAGE')
+
+  const wordCount = Number.isFinite(post?.wordCount) ? post.wordCount : 0
+  const readTime = Number.isFinite(post?.readTime) ? post.readTime : 0
+
+  return (
+    <div className='relative flex h-[60dvh] max-h-[800px] overflow-hidden'>
+      <div className='absolute inset-0 h-full bg-black/40' />
+
+      <div className='absolute inset-0 bottom-[8vh] flex flex-col items-center justify-center px-5 text-white'>
+        <h1 className='shadow-text text-center text-5xl/[1.2] font-bold tracking-widest max-w-7xl'>
+          {title}
+        </h1>
+
+        {description && <p className='shadow-text mt-4 text-sm'>= {description} =</p>}
+
+        <section className='flex-wrap shadow-text-md flex text-sm justify-center mt-4 text-white font-light leading-8'>
+          <div className='flex justify-center'>
+            <div className='mr-2'>
+              <WordCount wordCount={wordCount} readTime={readTime} />
+            </div>
+            {post?.type !== 'Page' && (
+              <SmartLink
+                href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                passHref
+                className='pl-1 mr-2 cursor-pointer hover:underline'>
+                <i className='fa-regular fa-calendar' /> {post?.publishDay}
+              </SmartLink>
+            )}
+            <div className='pl-1 mr-2'>
+              <i className='fa-regular fa-calendar-check' /> {post?.lastEditedDay}
+            </div>
+          </div>
+
+          {ANALYTICS_BUSUANZI_ENABLE && (
+            <div className='busuanzi_container_page_pv font-light mr-2'>
+              <i className='fa-solid fa-fire-flame-curved' />{' '}
+              <span className='mr-2 busuanzi_value_page_pv' />
+            </div>
+          )}
+        </section>
+      </div>
+
+      <div className='hero-bottom-fade absolute inset-x-0 bottom-0 h-28' />
+
+      <div className='relative -z-10 h-full min-h-60 w-full'>
+        <LazyImage src={bannerImage} className='h-full w-full object-cover' alt='cover' />
+      </div>
+
+      <WaveSvg />
+    </div>
+  )
 }
 
 
@@ -279,8 +346,12 @@ const LayoutBase = props => {
 
 
   const slotCover =
-
-    props.slotCover || (isHome ? <HomeCover siteInfo={props?.siteInfo} /> : null)
+    props.slotCover ||
+    (post ? (
+      <PostCover post={post} siteInfo={props?.siteInfo} />
+    ) : isHome ? (
+      <HomeCover siteInfo={props?.siteInfo} />
+    ) : null)
 
   const slotSider = props.slotSider || <SideBar {...props} />
 
@@ -321,8 +392,7 @@ const LayoutBase = props => {
       <Header {...props} />
 
       {/* 标题栏 */}
-
-      <TitleBar {...props} />
+      {!post && <TitleBar {...props} />}
 
 
 
@@ -464,7 +534,12 @@ const LayoutIndex = props => {
 
   const noticePost = props?.notice
 
-  const noticeHref = noticePost?.href || (noticePost?.slug ? `/post/${noticePost.slug}` : null)
+  const noticeHref =
+    noticePost?.href && noticePost.href !== '#'
+      ? noticePost.href
+      : noticePost?.slug
+        ? `/${String(noticePost.slug).replace(/^\/+/, '')}`
+        : null
 
   const noticeCover =
 
@@ -474,25 +549,9 @@ const LayoutIndex = props => {
 
   
 
-  // 计算字数和阅读时间（如果没有的话）
+  const noticeWordCount = Number.isFinite(noticePost?.wordCount) ? noticePost.wordCount : 0
 
-  const postDescription = noticePost?.summary || noticePost?.description || ''
-
-  const metaText = `${noticePost?.title || ''} ${postDescription}`.trim()
-
-  const estimated = metaText ? countWords(metaText) : { wordCount: 0, readTime: 0 }
-
-  const noticeWordCount = Number.isFinite(noticePost?.wordCount) && noticePost.wordCount > 0
-
-    ? noticePost.wordCount
-
-    : estimated.wordCount
-
-  const noticeReadTime = Number.isFinite(noticePost?.readTime) && noticePost.readTime > 0
-
-    ? noticePost.readTime
-
-    : estimated.readTime
+  const noticeReadTime = Number.isFinite(noticePost?.readTime) ? noticePost.readTime : 0
 
 
 

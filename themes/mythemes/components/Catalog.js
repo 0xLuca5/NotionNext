@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * @returns {JSX.Element}
  * @constructor
  */
-const Catalog = ({ toc }) => {
+const Catalog = ({ toc, variant }) => {
   // 监听滚动事件
   useEffect(() => {
     window.addEventListener('scroll', actionSectionScrollSpy)
@@ -59,29 +59,61 @@ const Catalog = ({ toc }) => {
     return <></>
   }
 
+  const isPostVariant = variant === 'post'
+
   return (
-    <div className='px-3'>
+    <div className={isPostVariant ? '' : 'px-3'}>
       <div
-        className='overflow-y-auto max-h-96 overscroll-none scroll-hidden'
+        className={
+          isPostVariant
+            ? 'post-toc-scroll overflow-y-auto max-h-[60vh] overscroll-none scroll-hidden'
+            : 'overflow-y-auto max-h-96 overscroll-none scroll-hidden'
+        }
         ref={tRef}>
-        <nav className='h-full  text-black dark:text-gray-300'>
+        <nav
+          className={
+            isPostVariant
+              ? 'post-toc-nav h-full text-gray-800 dark:text-gray-200'
+              : 'h-full  text-black dark:text-gray-300'
+          }>
           {toc.map(tocItem => {
             const id = uuidToId(tocItem.id)
             tocIds.push(id)
+            const isActive = activeSection === id
+            const levelClass = `catalog-item-level-${tocItem.indentLevel || 0}`
             return (
               <a
                 key={id}
                 href={`#${id}`}
-                className={`notion-table-of-contents-item duration-300 transform font-light
-              notion-table-of-contents-item-indent-level-${tocItem.indentLevel} catalog-item `}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    marginLeft: tocItem.indentLevel * 16
-                  }}
-                  className={`truncate ${activeSection === id ? ' font-bold text-red-400 underline' : ''}`}>
-                  {tocItem.text}
-                </span>
+                className={
+                  isPostVariant
+                    ? `catalog-item ${levelClass} block rounded-md px-2 py-1 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/10 ${
+                        isActive ? 'text-primary font-medium' : 'text-gray-800/80 dark:text-gray-200/80'
+                      }`
+                    : `notion-table-of-contents-item duration-300 transform font-light
+              notion-table-of-contents-item-indent-level-${tocItem.indentLevel} catalog-item `
+                }>
+                {isPostVariant ? (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginLeft: tocItem.indentLevel * 16
+                    }}
+                    className='truncate'>
+                    {tocItem.text}
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginLeft: tocItem.indentLevel * 16
+                    }}
+                    className={`truncate ${
+                      activeSection === id ? ' font-bold text-red-400 underline' : ''
+                    }`}>
+                    {tocItem.text}
+                  </span>
+                )}
               </a>
             )
           })}

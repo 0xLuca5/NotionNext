@@ -19,7 +19,20 @@ const ExampleRecentComments = dynamic(
  */
 export const SideBar = props => {
   const { locale, isDarkMode } = useGlobal()
-  const { latestPosts, categoryOptions, tagOptions, notice, post, siteInfo, customNav, customMenu, postCount } = props
+  const {
+    latestPosts,
+    categoryOptions,
+    tagOptions,
+    notice,
+    post,
+    siteInfo,
+    customNav,
+    customMenu,
+    postCount,
+    seriesPosts,
+    allPages,
+    posts
+  } = props
   const router = useRouter()
   // 评论相关
   const COMMENT_WALINE_SERVER_URL = siteConfig(
@@ -460,8 +473,8 @@ export const SideBar = props => {
     )
   }
 
-  return (
-    <>
+  const InfoPanel = () => {
+    return (
       <aside className='w-full rounded-xl overflow-hidden mb-6 '>
         <div className='p-5 flex flex-col items-center'>
           <div className='relative h-36 w-36 rounded-full overflow-hidden shadow-card-darker'>
@@ -497,16 +510,96 @@ export const SideBar = props => {
           <NavButtons />
         </div>
       </aside>
+    )
+  }
 
-      {/* 目录 */}
-      {post?.toc && post?.toc.length > 2 && (
-        <aside className='w-full rounded-xl shadow-card overflow-hidden mb-6 pb-4'>
-          <h3 className='text-sm text-gray-700 dark:text-gray-200 py-3 px-4 border-b border-black/10 dark:border-white/10'>
-            {locale.COMMON.TABLE_OF_CONTENTS}
-          </h3>
-          <Catalog toc={post?.toc} />
-        </aside>
-      )}
+  const TocPanel = () => {
+    if (!(post?.toc && post?.toc.length > 2)) {
+      return null
+    }
+
+    return <Catalog toc={post?.toc} variant='post' />
+  }
+
+  const SeriesPanel = () => {
+    const category = post?.category
+
+    const precomputed = Array.isArray(seriesPosts) ? seriesPosts : []
+    if (category && precomputed.length > 0) {
+      const list = [post, ...precomputed].filter(Boolean)
+      return (
+        <div className='w-full mb-6'>
+          <ul className='flex flex-col gap-4 text-sm'>
+            {list.slice(0, 10).map((p, idx) => {
+              const isCurrent = (post?.id && p?.id === post.id) || p?.slug === post?.slug
+              const dotClass = isCurrent
+                ? 'bg-[#ff5c7c]'
+                : 'bg-black/30 dark:bg-white/30'
+
+              const linkClass = isCurrent
+                ? 'text-[#ff5c7c]'
+                : 'text-gray-800/80 dark:text-gray-200/80'
+
+              return (
+                <li key={p?.id || p?.href || idx} className='flex items-start gap-3'>
+                  <span className={`mt-2 h-2 w-2 rounded-full ${dotClass}`} />
+                  <SmartLink href={p?.href} className={`min-w-0 flex-1 ${linkClass}`}>
+                    <span className='line-clamp-2'>{p?.title}</span>
+                  </SmartLink>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )
+    }
+
+    const sourceList = Array.isArray(allPages)
+      ? allPages
+      : Array.isArray(posts)
+        ? posts
+        : []
+
+    const filteredSeriesPosts = sourceList
+      .filter(p => p?.type === 'Post' && p?.status === 'Published')
+      .filter(p => (category ? p?.category === category : false))
+      .filter(p => (post?.id ? p?.id !== post.id : p?.slug !== post?.slug))
+
+    if (!category || filteredSeriesPosts.length === 0) {
+      return null
+    }
+
+    const list = [post, ...filteredSeriesPosts].filter(Boolean)
+    return (
+      <div className='w-full mb-6'>
+        <ul className='flex flex-col gap-4 text-sm'>
+          {list.slice(0, 10).map((p, idx) => {
+            const isCurrent = (post?.id && p?.id === post.id) || p?.slug === post?.slug
+            const dotClass = isCurrent
+              ? 'bg-[#ff5c7c]'
+              : 'bg-black/30 dark:bg-white/30'
+
+            const linkClass = isCurrent
+              ? 'text-[#ff5c7c]'
+              : 'text-gray-800/80 dark:text-gray-200/80'
+
+            return (
+              <li key={p?.id || p?.href || idx} className='flex items-start gap-3'>
+                <span className={`mt-2 h-2 w-2 rounded-full ${dotClass}`} />
+                <SmartLink href={p?.href} className={`min-w-0 flex-1 ${linkClass}`}>
+                  <span className='line-clamp-2'>{p?.title}</span>
+                </SmartLink>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {post ? <PostSider /> : <InfoPanel />}
 
       {/* 最近评论 */}
       {COMMENT_WALINE_SERVER_URL && COMMENT_WALINE_RECENT && (
@@ -522,4 +615,49 @@ export const SideBar = props => {
       )}
     </>
   )
+
+  function PostSider() {
+    const [tab, setTab] = useState('toc')
+
+    const items = [
+      { key: 'info', label: '信息', icon: 'fas fa-circle-info' },
+      { key: 'toc', label: '文章目录', icon: 'fas fa-list-ol' },
+      { key: 'series', label: '系列文章', icon: 'fas fa-layer-group' }
+    ]
+
+    const btnBase =
+      'flex h-11 items-center justify-center rounded-xl text-sm leading-none whitespace-nowrap overflow-hidden transition-all duration-300'
+    const btnInactive =
+      'bg-transparent text-gray-700/70 hover:bg-black/5 dark:text-white/70 dark:hover:bg-white/10'
+    const btnActive = 'bg-gradient-shoka-button text-white shadow-card'
+
+    return (
+      <>
+        <div className='mb-4 flex items-center gap-2 rounded-2xl bg-black/5 p-2 dark:bg-white/10'>
+          {items.map(item => {
+            const active = tab === item.key
+            const widthClass = active ? 'flex-1 gap-2 px-3' : 'w-11'
+            const iconSize = active ? 'text-sm' : 'text-base'
+
+            return (
+              <button
+                key={item.key}
+                type='button'
+                onClick={() => setTab(item.key)}
+                className={`${btnBase} ${widthClass} ${active ? btnActive : btnInactive}`}
+                aria-label={item.label}
+                title={item.label}>
+                <i className={`${item.icon} ${iconSize}`} />
+                {active && <span className='leading-none'>{item.label}</span>}
+              </button>
+            )
+          })}
+        </div>
+
+        {tab === 'info' && <InfoPanel />}
+        {tab === 'toc' && <TocPanel />}
+        {tab === 'series' && <SeriesPanel />}
+      </>
+    )
+  }
 }
