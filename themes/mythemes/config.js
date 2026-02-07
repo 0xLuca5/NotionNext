@@ -8,7 +8,7 @@ const CONFIG = {
     '必有回响',
     '欢迎来到我的博客🎉'
   ], // 首页大图标语文字
-  THEME_PRIMARY_COLOR: 'rgba(64, 135, 242)',
+  THEME_PRIMARY_COLOR: 'rgba(50, 112, 205)',
   // 菜单配置
   EXAMPLE_MENU_CATEGORY: true, // 显示分类
   EXAMPLE_MENU_TAG: true, // 显示标签
@@ -17,10 +17,5 @@ const CONFIG = {
 
   EXAMPLE_POST_LIST_COVER: true, // 列表显示文章封面
 
-  EXAMPLE_TITLE_IMAGE: false, // 标题栏，是否背景图片
-
-  // 文章页面布局
-  EXAMPLE_ARTICLE_LAYOUT_VERTICAL: false, // 文章详情，左右布局改为上下布局
-  EXAMPLE_ARTICLE_HIDDEN_NOTIFICATION: false // 文章详情隐藏公告
 }
 export default CONFIG
