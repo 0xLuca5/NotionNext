@@ -62,7 +62,7 @@ export const SideBar = props => {
   const activePath = router?.asPath?.split?.('?')?.[0]
   const avatar = siteConfig('AVATAR') || siteInfo?.icon || '/avatar.svg'
   const authorName = siteConfig('AUTHOR') || siteConfig('TITLE') || siteInfo?.title
-  const description = siteInfo?.description || siteConfig('DESCRIPTION')
+  const description = (CONFIG?.AUTHOR_DESCRIPTION && CONFIG.AUTHOR_DESCRIPTION.trim()) || siteInfo?.description || siteConfig('DESCRIPTION')
   const categoryCount = Array.isArray(categoryOptions) ? categoryOptions.length : 0
   const tagCount = Array.isArray(tagOptions) ? tagOptions.length : 0
 
@@ -485,7 +485,7 @@ export const SideBar = props => {
             />
           </div>
           <p className='mt-3 text-base font-semibold text-gray-900 dark:text-gray-100'>{authorName}</p>
-          {description && (
+          {CONFIG?.SHOW_AUTHOR_DESCRIPTION !== false && description && (
             <p className='mt-3 text-center text-sm text-gray-700/80 dark:text-white/80'>
               {description}
             </p>

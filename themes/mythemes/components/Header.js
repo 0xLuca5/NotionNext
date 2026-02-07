@@ -268,7 +268,7 @@ const KoharuThemeToggle = ({ className }) => {
 export const Header = props => {
   const router = useRouter()
   const { locale } = useGlobal()
-  const [themeColor, setThemeColor] = useState(CONFIG?.THEME_PRIMARY_COLOR || '#3c48f58c')
+  const [themeColor, setThemeColor] = useState(CONFIG?.THEME_PRIMARY_COLOR || '#ec4899')
   const isHome =
     router?.pathname === '/' ||
     router?.pathname === '/page/[page]' ||
