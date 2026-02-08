@@ -484,7 +484,7 @@ export const Header = props => {
   const avatar = siteConfig('AVATAR') || props?.siteInfo?.icon || '/avatar.svg'
   const authorName =
     siteConfig('AUTHOR') || siteConfig('TITLE') || props?.siteInfo?.title
-  const description = props?.siteInfo?.description || siteConfig('DESCRIPTION')
+  const description = (CONFIG?.AUTHOR_DESCRIPTION && CONFIG.AUTHOR_DESCRIPTION.trim()) || props?.siteInfo?.description || siteConfig('DESCRIPTION')
   const categoryCount = Array.isArray(props?.categoryOptions)
     ? props.categoryOptions.length
     : 0
